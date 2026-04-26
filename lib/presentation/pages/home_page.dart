@@ -13,7 +13,8 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n =
+        AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
     final connectionConfig = ref.watch(connectionConfigProvider);
     final datasets = ref.watch(datasetsProvider);
     final models = ref.watch(modelsProvider);

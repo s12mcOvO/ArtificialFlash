@@ -34,7 +34,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n =
+        AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
     final connectionConfig = ref.watch(connectionConfigProvider);
     final settings = ref.watch(appSettingsProvider);
 
@@ -276,14 +277,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ref.read(connectionConfigProvider.notifier).updateHost(host);
     ref.read(connectionConfigProvider.notifier).updatePort(port);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.saveConfig)),
-    );
+    final l =
+        AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l.saveConfig)));
   }
 
   void _testConnection() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.testConnection)),
-    );
+    final l =
+        AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l.testConnection)));
   }
 }

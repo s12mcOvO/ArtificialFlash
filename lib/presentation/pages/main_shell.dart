@@ -16,7 +16,8 @@ class MainShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = ref.watch(currentIndexProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n =
+        AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
 
     final pages = [
       const HomePage(),
