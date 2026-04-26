@@ -65,3 +65,5 @@ class ConnectionConfigNotifier extends StateNotifier<ConnectionConfig> {
     state = state.copyWith(isConnected: isConnected);
   }
 }
+
+final currentIndexProvider = StateProvider<int>((ref) => 0);

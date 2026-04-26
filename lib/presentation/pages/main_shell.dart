@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/core/theme/app_theme.dart';
-import 'package:artificial_flash/presentation/widgets/responsive_layout.dart';
 import 'package:artificial_flash/presentation/pages/home_page.dart';
+import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/presentation/pages/data_page.dart';
 import 'package:artificial_flash/presentation/pages/model_config_page.dart';
 import 'package:artificial_flash/presentation/pages/training_page.dart';
 import 'package:artificial_flash/presentation/pages/models_page.dart';
 import 'package:artificial_flash/presentation/pages/settings_page.dart';
-import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/l10n/app_localizations.dart';
 
 class MainShell extends ConsumerWidget {

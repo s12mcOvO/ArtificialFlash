@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:artificial_flash/presentation/providers/dataset_provider.dart';
 import 'package:artificial_flash/domain/entities/dataset.dart';
 import 'package:artificial_flash/core/theme/app_theme.dart';
