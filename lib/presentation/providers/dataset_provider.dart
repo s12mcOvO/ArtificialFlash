@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/domain/entities/dataset.dart';
-import 'package:artificial_flash/core/network/api_service.dart';
 import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/core/utils/local_storage.dart';
 import 'package:uuid/uuid.dart';

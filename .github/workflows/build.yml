@@ -26,8 +26,6 @@ jobs:
             platform: windows
           - os: ubuntu-latest
             platform: android
-          - os: macos-latest
-            platform: ios
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -75,10 +73,6 @@ jobs:
         if: matrix.platform == 'android'
         run: flutter build apk --release
 
-      - name: Build iOS
-        if: matrix.platform == 'ios'
-        run: flutter build ios --release --no-codesign
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -88,7 +82,6 @@ jobs:
             build/macos/Build/Products/Release/**
             build/windows/x64/runner/Release/**
             build/app/outputs/flutter-apk/**
-            build/ios/iphoneos/Payload/**
           retention-days: 5
 
   release:
@@ -123,6 +116,5 @@ jobs:
             artifacts/macos-release/Build/Products/Release/**
             artifacts/windows-release/runner/Release/**
             artifacts/android-release/flutter-apk/**
-            artifacts/ios-release/Payload/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
