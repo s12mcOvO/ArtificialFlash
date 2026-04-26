@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  flutter_version: '3.41.2'
+  flutter_version: '3.41.0'
 
 jobs:
   build:
@@ -37,6 +37,7 @@ jobs:
         with:
           flutter-version: ${{ env.flutter_version }}
           channel: stable
+          cache: true
 
       - name: Setup Android SDK
         if: matrix.platform == 'android'
