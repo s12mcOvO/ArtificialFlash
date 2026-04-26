@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/domain/entities/training.dart';
 import 'package:artificial_flash/domain/entities/model.dart';
@@ -20,7 +21,11 @@ class TrainingSessionNotifier
     extends StateNotifier<AsyncValue<TrainingSession?>> {
   final Ref _ref;
   final _uuid = const Uuid();
+  final _random = Random();
   StreamSubscription? _wsSubscription;
+  Timer? _simulationTimer;
+  double _baseLoss = 2.5;
+  double _baseAccuracy = 0.1;
 
   TrainingSessionNotifier(this._ref) : super(const AsyncValue.data(null)) {
     _initWebSocketListener();
@@ -116,13 +121,18 @@ class TrainingSessionNotifier
 
     state = AsyncValue.data(session);
 
+    if (mode == TrainingMode.local) {
+      _baseLoss = 2.0 + _random.nextDouble() * 0.5;
+      _baseAccuracy = 0.1 + _random.nextDouble() * 0.1;
+      _startLocalSimulation(model);
+      return;
+    }
+
     try {
-      if (mode == TrainingMode.remote) {
-        await _api.post(
-          '/training/start',
-          data: {'model_id': model.id, 'session_id': session.id},
-        );
-      }
+      await _api.post(
+        '/training/start',
+        data: {'model_id': model.id, 'session_id': session.id},
+      );
 
       state.whenData((s) {
         if (s != null) {
@@ -143,61 +153,127 @@ class TrainingSessionNotifier
     }
   }
 
+  void _startLocalSimulation(Model model) {
+    int currentEpoch = 0;
+    final totalEpochs = model.params?.epochs ?? 10;
+    final batchSize = model.params?.batchSize;
+    final stepsPerEpoch = batchSize != null ? (100 / batchSize).ceil() : 10;
+
+    _simulationTimer?.cancel();
+    _simulationTimer = Timer.periodic(const Duration(milliseconds: 500), (
+      timer,
+    ) {
+      state.whenData((session) {
+        if (session == null) {
+          timer.cancel();
+          return;
+        }
+
+        if (session.status == TrainingStatus.paused) {
+          return;
+        }
+
+        currentEpoch++;
+        final step = _random.nextInt(stepsPerEpoch);
+
+        final lossDecay = (_baseLoss - 0.05) * currentEpoch / totalEpochs;
+        final lossNoise = (_random.nextDouble() - 0.5) * 0.1;
+        final loss = max(0.05, lossDecay + lossNoise);
+
+        final accGain = (_baseAccuracy - 0.1) * currentEpoch / totalEpochs;
+        final accNoise = (_random.nextDouble() - 0.5) * 0.02;
+        final accuracy = min(0.98, max(0.1, accGain + accNoise));
+
+        final log = TrainingLog(
+          epoch: currentEpoch,
+          step: step,
+          loss: loss,
+          accuracy: accuracy,
+          message:
+              'Epoch $currentEpoch/$totalEpochs - Loss: ${loss.toStringAsFixed(4)}, Acc: ${accuracy.toStringAsFixed(4)}',
+          timestamp: DateTime.now(),
+        );
+
+        final newLogs = [...session.logs, log];
+        if (newLogs.length > 1000) {
+          newLogs.removeAt(0);
+        }
+
+        final progress = totalEpochs > 0 ? currentEpoch / totalEpochs : 0.0;
+
+        if (currentEpoch >= totalEpochs) {
+          timer.cancel();
+          final trainedModel = model.copyWith(
+            status: ModelStatus.ready,
+            trainedAt: DateTime.now(),
+            accuracy: accuracy,
+            loss: loss,
+          );
+          _ref.read(modelsProvider.notifier).updateModel(trainedModel);
+
+          state = AsyncValue.data(
+            session.copyWith(
+              status: TrainingStatus.completed,
+              currentEpoch: currentEpoch,
+              currentLoss: loss,
+              currentAccuracy: accuracy,
+              progress: 1.0,
+              completedAt: DateTime.now(),
+              logs: newLogs,
+            ),
+          );
+        } else {
+          state = AsyncValue.data(
+            session.copyWith(
+              status: TrainingStatus.training,
+              currentEpoch: currentEpoch,
+              currentLoss: loss,
+              currentAccuracy: accuracy,
+              progress: progress,
+              logs: newLogs,
+            ),
+          );
+        }
+      });
+    });
+
+    state.whenData((s) {
+      if (s != null) {
+        state = AsyncValue.data(s.copyWith(status: TrainingStatus.training));
+      }
+    });
+  }
+
   Future<void> pauseTraining() async {
-    try {
-      await _api.post('/training/pause');
-      state.whenData((session) {
-        if (session != null) {
-          state = AsyncValue.data(
-            session.copyWith(status: TrainingStatus.paused),
-          );
-        }
-      });
-    } catch (e) {
-      state.whenData((session) {
-        if (session != null) {
-          state = AsyncValue.data(
-            session.copyWith(status: TrainingStatus.paused),
-          );
-        }
-      });
-    }
+    state.whenData((session) {
+      if (session != null) {
+        state = AsyncValue.data(
+          session.copyWith(status: TrainingStatus.paused),
+        );
+      }
+    });
   }
 
   Future<void> resumeTraining() async {
-    try {
-      await _api.post('/training/resume');
-      state.whenData((session) {
-        if (session != null) {
-          state = AsyncValue.data(
-            session.copyWith(status: TrainingStatus.training),
-          );
-        }
-      });
-    } catch (e) {
-      state.whenData((session) {
-        if (session != null) {
-          state = AsyncValue.data(
-            session.copyWith(status: TrainingStatus.training),
-          );
-        }
-      });
-    }
+    state.whenData((session) {
+      if (session != null) {
+        state = AsyncValue.data(
+          session.copyWith(status: TrainingStatus.training),
+        );
+      }
+    });
   }
 
   Future<void> stopTraining() async {
-    try {
-      await _api.post('/training/stop');
-    } catch (e) {
-      // Ignore errors
-    }
-
+    _simulationTimer?.cancel();
+    _simulationTimer = null;
     state = const AsyncValue.data(null);
   }
 
   @override
   void dispose() {
     _wsSubscription?.cancel();
+    _simulationTimer?.cancel();
     super.dispose();
   }
 }

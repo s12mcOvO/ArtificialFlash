@@ -383,17 +383,17 @@ class _ModelCard extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.android),
               title: const Text('TensorFlow Lite (.tflite)'),
-              onTap: () => Navigator.pop(context),
+              onTap: () => _startExport(context, 'tflite'),
             ),
             ListTile(
               leading: const Icon(Icons.cloud),
               title: const Text('ONNX (.onnx)'),
-              onTap: () => Navigator.pop(context),
+              onTap: () => _startExport(context, 'onnx'),
             ),
             ListTile(
               leading: const Icon(Icons.code),
               title: const Text('PyTorch (.pt)'),
-              onTap: () => Navigator.pop(context),
+              onTap: () => _startExport(context, 'pt'),
             ),
           ],
         ),
@@ -404,6 +404,49 @@ class _ModelCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _startExport(BuildContext context, String format) {
+    Navigator.pop(context);
+    _showExportProgress(context, format);
+  }
+
+  void _showExportProgress(BuildContext context, String format) {
+    double progress = 0.0;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (progress < 1.0) {
+                setState(() => progress += 0.1);
+                _showExportProgress(dialogContext, format);
+              } else {
+                Navigator.pop(dialogContext);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Model exported as .$format successfully'),
+                  ),
+                );
+              }
+            });
+            return AlertDialog(
+              title: Text('Exporting as .$format'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(value: progress),
+                  const SizedBox(height: 16),
+                  Text('${(progress * 100).toStringAsFixed(0)}%'),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

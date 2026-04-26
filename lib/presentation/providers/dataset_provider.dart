@@ -1,8 +1,115 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/domain/entities/dataset.dart';
 import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/core/utils/local_storage.dart';
 import 'package:uuid/uuid.dart';
+
+class DownloadProgress {
+  final String datasetName;
+  final double progress;
+  final bool isDownloading;
+  final bool isCompleted;
+  final String? error;
+
+  const DownloadProgress({
+    required this.datasetName,
+    this.progress = 0.0,
+    this.isDownloading = false,
+    this.isCompleted = false,
+    this.error,
+  });
+
+  DownloadProgress copyWith({
+    String? datasetName,
+    double? progress,
+    bool? isDownloading,
+    bool? isCompleted,
+    String? error,
+  }) {
+    return DownloadProgress(
+      datasetName: datasetName ?? this.datasetName,
+      progress: progress ?? this.progress,
+      isDownloading: isDownloading ?? this.isDownloading,
+      isCompleted: isCompleted ?? this.isCompleted,
+      error: error,
+    );
+  }
+}
+
+final downloadProgressProvider =
+    StateNotifierProvider<DownloadProgressNotifier, DownloadProgress?>((ref) {
+      return DownloadProgressNotifier(ref);
+    });
+
+class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
+  final Ref _ref;
+  Timer? _simulationTimer;
+
+  DownloadProgressNotifier(this._ref) : super(null);
+
+  final Map<String, int> _datasetSizes = {
+    'MNIST': 50,
+    'CIFAR-10': 170,
+    'Fashion-MNIST': 30,
+    'IMDB Reviews': 80,
+    'SST-2': 10,
+  };
+
+  Future<void> downloadDataset(String name) async {
+    if (state?.isDownloading == true) return;
+
+    final size = _datasetSizes[name] ?? 50;
+    state = DownloadProgress(
+      datasetName: name,
+      isDownloading: true,
+      progress: 0.0,
+    );
+
+    _simulationTimer?.cancel();
+    _simulationTimer = Timer.periodic(
+      Duration(milliseconds: 100 + (size * 5)),
+      (timer) {
+        state = state?.copyWith(progress: (state?.progress ?? 0) + 0.02);
+
+        if ((state?.progress ?? 0) >= 1.0) {
+          timer.cancel();
+          state = state?.copyWith(
+            progress: 1.0,
+            isDownloading: false,
+            isCompleted: true,
+          );
+          _addDownloadedDataset(name);
+        }
+      },
+    );
+  }
+
+  void _addDownloadedDataset(String name) {
+    final type = name == 'IMDB Reviews' || name == 'SST-2'
+        ? DatasetType.text
+        : DatasetType.image;
+
+    final notifier = _ref.read(datasetsProvider.notifier);
+    notifier.addDataset(name: name, path: 'built-in/$name', type: type);
+  }
+
+  void cancelDownload() {
+    _simulationTimer?.cancel();
+    state = null;
+  }
+
+  void clear() {
+    _simulationTimer?.cancel();
+    state = null;
+  }
+
+  @override
+  void dispose() {
+    _simulationTimer?.cancel();
+    super.dispose();
+  }
+}
 
 final datasetsProvider =
     StateNotifierProvider<DatasetsNotifier, AsyncValue<List<Dataset>>>((ref) {

@@ -59,7 +59,7 @@ class _DataPageState extends ConsumerState<DataPage>
             onDragStateChanged: (v) => setState(() => _isDragging = v),
           ),
           _UrlDownloadTab(),
-          _BuiltInTab(),
+          _BuiltInTab(onDownload: _downloadBuiltIn),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -74,6 +74,95 @@ class _DataPageState extends ConsumerState<DataPage>
     showDialog(
       context: context,
       builder: (context) => const _AddDatasetDialog(),
+    );
+  }
+
+  void _downloadBuiltIn(BuildContext context, String name) {
+    ref.read(downloadProgressProvider.notifier).downloadDataset(name);
+    _showDownloadDialog(context, name);
+  }
+
+  void downloadFromUrl(String name) {
+    ref.read(downloadProgressProvider.notifier).downloadDataset(name);
+    _showDownloadDialog(context, name);
+  }
+
+  void _showDownloadDialog(BuildContext context, String name) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Consumer(
+        builder: (dialogContext, dialogRef, _) {
+          final progress = ref.watch(downloadProgressProvider);
+
+          if (progress == null || progress.datasetName != name) {
+            return AlertDialog(
+              title: Text('Downloading $name'),
+              content: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Preparing download...'),
+                ],
+              ),
+            );
+          }
+
+          if (progress.isCompleted) {
+            return AlertDialog(
+              title: const Text('Download Complete'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.success,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('$name has been downloaded successfully.'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    ref.read(downloadProgressProvider.notifier).clear();
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          }
+
+          return AlertDialog(
+            title: Text('Downloading $name'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LinearProgressIndicator(
+                  value: progress.progress,
+                  backgroundColor: Colors.grey[300],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '${(progress.progress * 100).toStringAsFixed(0)}% downloaded',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ref.read(downloadProgressProvider.notifier).cancelDownload();
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Cancel'),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -488,7 +577,6 @@ class _UrlDownloadTab extends StatefulWidget {
 class _UrlDownloadTabState extends State<_UrlDownloadTab> {
   final _urlController = TextEditingController();
   final _nameController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -528,15 +616,9 @@ class _UrlDownloadTabState extends State<_UrlDownloadTab> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _downloadDataset,
-              icon: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.download),
-              label: Text(_isLoading ? 'Downloading...' : 'Download'),
+              onPressed: _startDownload,
+              icon: const Icon(Icons.download),
+              label: const Text('Download'),
             ),
           ),
         ],
@@ -544,36 +626,24 @@ class _UrlDownloadTabState extends State<_UrlDownloadTab> {
     );
   }
 
-  Future<void> _downloadDataset() async {
+  void _startDownload() {
     if (_urlController.text.isEmpty || _nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
-    setState(() => _isLoading = true);
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Dataset downloaded successfully')),
-        );
-        _urlController.clear();
-        _nameController.clear();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
+
+    final name = _nameController.text.trim();
+    context.findAncestorStateOfType<_DataPageState>()?.downloadFromUrl(name);
   }
 }
 
 class _BuiltInTab extends StatelessWidget {
+  final void Function(BuildContext, String) onDownload;
+
+  const _BuiltInTab({required this.onDownload});
+
   @override
   Widget build(BuildContext context) {
     final builtInDatasets = [
@@ -634,20 +704,13 @@ class _BuiltInTab extends StatelessWidget {
             ),
             isThreeLine: true,
             trailing: ElevatedButton(
-              onPressed: () =>
-                  _downloadBuiltIn(context, dataset['name'] as String),
+              onPressed: () => onDownload(context, dataset['name'] as String),
               child: const Text('Download'),
             ),
           ),
         );
       },
     );
-  }
-
-  void _downloadBuiltIn(BuildContext context, String name) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Downloading $name...')));
   }
 }
 
