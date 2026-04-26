@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/domain/entities/dataset.dart';
 import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/core/utils/local_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class DownloadProgress {
@@ -48,54 +50,132 @@ class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
 
   DownloadProgressNotifier(this._ref) : super(null);
 
-  final Map<String, int> _datasetSizes = {
-    'MNIST': 50,
-    'CIFAR-10': 170,
-    'Fashion-MNIST': 30,
-    'IMDB Reviews': 80,
-    'SST-2': 10,
+  final Map<String, Map<String, dynamic>> _datasetInfo = {
+    'MNIST': {
+      'url': 'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz',
+      'size': 45,
+    },
+    'CIFAR-10': {
+      'url': 'https://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz',
+      'size': 170,
+    },
+    'Fashion-MNIST': {
+      'url':
+          'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz',
+      'size': 26,
+    },
+    'IMDB Reviews': {
+      'url': 'http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz',
+      'size': 80,
+    },
+    'SST-2': {
+      'url': 'https://nlp.stanford.edu/sentiment/train.zip',
+      'size': 10,
+    },
   };
 
   Future<void> downloadDataset(String name) async {
     if (state?.isDownloading == true) return;
+    if (!_datasetInfo.containsKey(name) && !_isUrlDownload(name)) return;
 
-    final size = _datasetSizes[name] ?? 50;
+    final isUrl = _isUrlDownload(name);
+    final info = isUrl ? null : _datasetInfo[name];
+    final url = isUrl ? name : info?['url'] as String?;
+
+    if (url == null || url.isEmpty) {
+      state = state?.copyWith(error: 'Invalid URL');
+      return;
+    }
+
     state = DownloadProgress(
-      datasetName: name,
+      datasetName: isUrl ? 'URL Download' : name,
       isDownloading: true,
       progress: 0.0,
     );
 
-    _simulationTimer?.cancel();
-    _simulationTimer = Timer.periodic(
-      Duration(milliseconds: 100 + (size * 5)),
-      (timer) {
-        state = state?.copyWith(progress: (state?.progress ?? 0) + 0.02);
+    try {
+      final downloadsDir = await _getDownloadsDirectory();
+      final fileName = _getFileNameFromUrl(url);
+      final filePath = '${downloadsDir.path}/$fileName';
 
-        if ((state?.progress ?? 0) >= 1.0) {
-          timer.cancel();
-          state = state?.copyWith(
-            progress: 1.0,
-            isDownloading: false,
-            isCompleted: true,
-          );
-          _addDownloadedDataset(name);
+      final httpClient = HttpClient();
+      httpClient.connectionTimeout = const Duration(seconds: 30);
+
+      final request = await httpClient.getUrl(Uri.parse(url));
+      final response = await request.close();
+
+      final totalBytes = response.contentLength;
+      if (totalBytes <= 0) {
+        throw Exception('Could not determine file size');
+      }
+
+      final file = File(filePath);
+      final sink = file.openWrite();
+      var receivedBytes = 0;
+      var lastUpdateTime = DateTime.now();
+
+      await for (final chunk in response) {
+        sink.add(chunk);
+        receivedBytes += chunk.length;
+
+        final now = DateTime.now();
+        if (now.difference(lastUpdateTime).inMilliseconds > 100) {
+          final progress = receivedBytes / totalBytes;
+          state = state?.copyWith(progress: progress);
+          lastUpdateTime = now;
         }
-      },
-    );
+      }
+
+      await sink.close();
+      httpClient.close();
+
+      final datasetName = isUrl ? 'Downloaded Dataset' : name;
+      _addDownloadedDataset(datasetName, filePath);
+
+      state = state?.copyWith(
+        progress: 1.0,
+        isDownloading: false,
+        isCompleted: true,
+      );
+    } catch (e) {
+      state = state?.copyWith(isDownloading: false, error: e.toString());
+    }
   }
 
-  void _addDownloadedDataset(String name) {
-    final type = name == 'IMDB Reviews' || name == 'SST-2'
-        ? DatasetType.text
-        : DatasetType.image;
+  bool _isUrlDownload(String name) {
+    return name.startsWith('http://') || name.startsWith('https://');
+  }
+
+  String _getFileNameFromUrl(String url) {
+    final uri = Uri.parse(url);
+    final pathSegments = uri.pathSegments;
+    if (pathSegments.isNotEmpty) {
+      return pathSegments.last;
+    }
+    return 'dataset_${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  Future<Directory> _getDownloadsDirectory() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final downloadsDir = Directory('${appDir.path}/ArtificialFlash/datasets');
+    if (!downloadsDir.existsSync()) {
+      downloadsDir.createSync(recursive: true);
+    }
+    return downloadsDir;
+  }
+
+  void _addDownloadedDataset(String name, String filePath) {
+    final isText =
+        name == 'IMDB Reviews' ||
+        name == 'SST-2' ||
+        name == 'Downloaded Dataset';
+    final type = isText ? DatasetType.text : DatasetType.image;
 
     final notifier = _ref.read(datasetsProvider.notifier);
-    notifier.addDataset(name: name, path: 'built-in/$name', type: type);
+    notifier.addDataset(name: name, path: filePath, type: type);
   }
 
   void cancelDownload() {
-    _simulationTimer?.cancel();
     state = null;
   }
 
