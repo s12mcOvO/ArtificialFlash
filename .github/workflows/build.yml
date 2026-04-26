@@ -15,8 +15,19 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: android
+          - os: macos-latest
+            platform: ios
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,15 +38,19 @@ jobs:
           flutter-version: ${{ env.flutter_version }}
           channel: stable
 
+      - name: Setup Android SDK
+        if: matrix.platform == 'android'
+        uses: android-actions/setup-android@v2
+
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
             build/
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ runner.os }}-flutter-${{ matrix.platform }}-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
-            ${{ runner.os }}-flutter-
+            ${{ runner.os }}-flutter-${{ matrix.platform }}-
 
       - name: Get dependencies
         run: flutter pub get
@@ -44,25 +59,35 @@ jobs:
         run: flutter analyze
 
       - name: Build Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.platform == 'linux'
         run: flutter build linux --release
 
       - name: Build macOS
-        if: matrix.os == 'macos-latest'
+        if: matrix.platform == 'macos'
         run: flutter build macos --release
 
       - name: Build Windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.platform == 'windows'
         run: flutter build windows --release
+
+      - name: Build Android APK
+        if: matrix.platform == 'android'
+        run: flutter build apk --release
+
+      - name: Build iOS
+        if: matrix.platform == 'ios'
+        run: flutter build ios --release --no-codesign
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-release
+          name: ${{ matrix.platform }}-release
           path: |
-            build/linux/x64/release/bundle/
-            build/macos/Build/Products/Release/
-            build/windows/x64/runner/Release/
+            build/linux/x64/release/bundle/**
+            build/macos/Build/Products/Release/**
+            build/windows/x64/runner/Release/**
+            build/app/outputs/flutter-apk/**
+            build/ios/iphoneos/Payload/**
           retention-days: 5
 
   release:
@@ -93,8 +118,10 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            artifacts/ubuntu-latest-release/bundle/**
+            artifacts/linux-release/bundle/**
             artifacts/macos-release/Build/Products/Release/**
             artifacts/windows-release/runner/Release/**
+            artifacts/android-release/flutter-apk/**
+            artifacts/ios-release/Payload/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
