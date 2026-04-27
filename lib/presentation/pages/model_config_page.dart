@@ -184,7 +184,7 @@ class _ModelConfigPageState extends ConsumerState<ModelConfigPage> {
                     labelText: 'Select Dataset',
                     prefixIcon: Icon(Icons.folder),
                   ),
-                  items: data.map((dataset) {
+                  items: data.map<DropdownMenuItem<String>>((dataset) {
                     return DropdownMenuItem(
                       value: dataset.id,
                       child: Text(dataset.name),
