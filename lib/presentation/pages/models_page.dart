@@ -68,13 +68,13 @@ class ModelsPage extends ConsumerWidget {
   }
 }
 
-class _ModelCard extends StatelessWidget {
+class _ModelCard extends ConsumerWidget {
   final Model model;
 
   const _ModelCard({required this.model});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -167,7 +167,7 @@ class _ModelCard extends StatelessWidget {
                           _showExportDialog(context);
                           break;
                         case 'delete':
-                          _showDeleteConfirmation(context);
+                          _showDeleteConfirmation(context, ref);
                           break;
                       }
                     },
@@ -450,19 +450,22 @@ class _ModelCard extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Model'),
         content: Text('Are you sure you want to delete "${model.name}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              ref.read(modelsProvider.notifier).deleteModel(model.id);
+            },
             child: const Text(
               'Delete',
               style: TextStyle(color: AppColors.error),

@@ -140,8 +140,7 @@ class HomePage extends ConsumerWidget {
   }
 
   void _navigateTo(int index, WidgetRef ref) {
-    // Import the provider from main_shell
-    // Using a workaround to avoid circular imports
+    ref.read(currentIndexProvider.notifier).state = index;
   }
 }
 

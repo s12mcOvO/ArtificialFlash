@@ -284,11 +284,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ).showSnackBar(SnackBar(content: Text(l.saveConfig)));
   }
 
-  void _testConnection() {
+  void _testConnection() async {
     final l =
         AppLocalizations.of(context) ?? AppLocalizations(const Locale('en'));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l.testConnection)));
+    final config = ref.read(connectionConfigProvider);
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Testing connection to ${config.host}:${config.port}...',
+          ),
+        ),
+      );
+
+      final api = ref.read(apiServiceProvider);
+      await api.get('/health');
+
+      if (mounted) {
+        ref.read(connectionConfigProvider.notifier).setConnected(true);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.serverConnected)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ref.read(connectionConfigProvider.notifier).setConnected(false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Connection failed: $e')));
+      }
+    }
   }
 }

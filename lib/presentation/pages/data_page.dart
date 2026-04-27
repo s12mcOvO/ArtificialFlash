@@ -296,13 +296,13 @@ class _LocalFilesTab extends ConsumerWidget {
   }
 }
 
-class _DatasetCard extends StatelessWidget {
+class _DatasetCard extends ConsumerWidget {
   final Dataset dataset;
 
   const _DatasetCard({required this.dataset});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -387,7 +387,7 @@ class _DatasetCard extends StatelessWidget {
                 ],
                 onSelected: (value) {
                   if (value == 'delete') {
-                    _showDeleteConfirmation(context);
+                    _showDeleteConfirmation(context, ref);
                   } else if (value == 'preview') {
                     _showDatasetDetails(context);
                   }
@@ -477,20 +477,21 @@ class _DatasetCard extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Dataset'),
         content: Text('Are you sure you want to delete "${dataset.name}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
+              ref.read(datasetsProvider.notifier).deleteDataset(dataset.id);
             },
             child: const Text(
               'Delete',
