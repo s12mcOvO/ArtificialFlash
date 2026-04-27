@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/presentation/providers/model_provider.dart';
 import 'package:artificial_flash/presentation/providers/dataset_provider.dart';
 import 'package:artificial_flash/domain/entities/model.dart';
+import 'package:artificial_flash/domain/entities/dataset.dart';
 import 'package:artificial_flash/core/constants/app_constants.dart';
 
 class ModelConfigPage extends ConsumerStatefulWidget {
@@ -184,12 +185,14 @@ class _ModelConfigPageState extends ConsumerState<ModelConfigPage> {
                     labelText: 'Select Dataset',
                     prefixIcon: Icon(Icons.folder),
                   ),
-                  items: data.map<DropdownMenuItem<String>>((dataset) {
-                    return DropdownMenuItem(
-                      value: dataset.id,
-                      child: Text(dataset.name),
-                    );
-                  }).toList(),
+                  items: data
+                      .map(
+                        (Dataset dataset) => DropdownMenuItem<String>(
+                          value: dataset.id,
+                          child: Text(dataset.name),
+                        ),
+                      )
+                      .toList(),
                   onChanged: (value) {
                     setState(() => _selectedDatasetId = value);
                   },
