@@ -149,6 +149,29 @@ class AppLocalizations {
       'step4Desc': 'View and export your trained models in Models tab.',
       'view': 'View',
       'preview': 'Preview',
+      'selectExportFormat': 'Select export format:',
+      'exportAsTflite': 'TensorFlow Lite (.tflite)',
+      'exportAsOnnx': 'ONNX (.onnx)',
+      'exportAsPytorch': 'PyTorch (.pt)',
+      'exportSuccess': 'Model exported as .%s successfully',
+      'exportFailed': 'Export failed: %s',
+      'runTest': 'Run Test',
+      'inputText': 'Input Text',
+      'enterTextToClassify': 'Enter text to classify/analyze',
+      'imagePath': 'Image Path',
+      'enterImagePath': '/path/to/image.jpg',
+      'testResult': 'Test Result',
+      'prediction': 'Prediction',
+      'confidence': 'Confidence',
+      'runningInference': 'Running inference on %s...',
+      'testFailed': 'Test failed: %s',
+      'textClassification': 'Enter text to classify into categories.',
+      'sentimentAnalysis':
+          'Enter text for sentiment analysis (positive/negative).',
+      'questionAnswering': 'Enter a question to get an answer from the model.',
+      'imageClassification': 'Provide image path to classify the image.',
+      'objectDetection': 'Provide image path to detect objects.',
+      'enterInputData': 'Enter input data to test the model.',
     },
     'zh': {
       'appTitle': 'ArtificialFlash',
@@ -274,7 +297,7 @@ class AppLocalizations {
       'quickActions': '快捷操作',
       'gettingStarted': '入门指南',
       'step1': '上传数据',
-      'step1Desc': '在数据标签页上传图像或文本文件进行训练。',
+      'step1Desc': '在���据标签页上传图像或文本文件进行训练。',
       'step2': '配置模型',
       'step2Desc': '在模型标签页选择模型类型并自定义参数。',
       'step3': '开始训练',
@@ -283,6 +306,28 @@ class AppLocalizations {
       'step4Desc': '在模型库标签页查看并导出训练好的模型。',
       'view': '查看',
       'preview': '预览',
+      'selectExportFormat': '选择导出格式：',
+      'exportAsTflite': 'TensorFlow Lite (.tflite)',
+      'exportAsOnnx': 'ONNX (.onnx)',
+      'exportAsPytorch': 'PyTorch (.pt)',
+      'exportSuccess': '模型已成功导出为.%s格式',
+      'exportFailed': '导出失败：%s',
+      'runTest': '运行测试',
+      'inputText': '输入文本',
+      'enterTextToClassify': '输入要分类/分析的文本',
+      'imagePath': '图像路径',
+      'enterImagePath': '/path/to/image.jpg',
+      'testResult': '测试结果',
+      'prediction': '预测结果',
+      'confidence': '置信度',
+      'runningInference': '正在对%s进行推理...',
+      'testFailed': '测试失败：%s',
+      'textClassification': '输入文��进行分类。',
+      'sentimentAnalysis': '输入文本进行情感分析（正面/负面）。',
+      'questionAnswering': '输入问题获取模型答案。',
+      'imageClassification': '提供图像路径以分类图像。',
+      'objectDetection': '提供图像路径以检测对象。',
+      'enterInputData': '输入测试数据。',
     },
   };
 
@@ -424,6 +469,28 @@ class AppLocalizations {
   String get step4Desc => _translate('step4Desc');
   String get view => _translate('view');
   String get preview => _translate('preview');
+  String get selectExportFormat => _translate('selectExportFormat');
+  String get exportAsTflite => _translate('exportAsTflite');
+  String get exportAsOnnx => _translate('exportAsOnnx');
+  String get exportAsPytorch => _translate('exportAsPytorch');
+  String get exportSuccess => _translate('exportSuccess');
+  String get exportFailed => _translate('exportFailed');
+  String get runTest => _translate('runTest');
+  String get inputText => _translate('inputText');
+  String get enterTextToClassify => _translate('enterTextToClassify');
+  String get imagePath => _translate('imagePath');
+  String get enterImagePath => _translate('enterImagePath');
+  String get testResult => _translate('testResult');
+  String get prediction => _translate('prediction');
+  String get confidence => _translate('confidence');
+  String get runningInference => _translate('runningInference');
+  String get testFailed => _translate('testFailed');
+  String get textClassification => _translate('textClassification');
+  String get sentimentAnalysis => _translate('sentimentAnalysis');
+  String get questionAnswering => _translate('questionAnswering');
+  String get imageClassification => _translate('imageClassification');
+  String get objectDetection => _translate('objectDetection');
+  String get enterInputData => _translate('enterInputData');
 }
 
 class _AppLocalizationsDelegate
