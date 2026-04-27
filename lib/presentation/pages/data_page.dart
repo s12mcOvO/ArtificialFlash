@@ -429,51 +429,26 @@ class _DatasetCard extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.3,
-        maxChildSize: 0.8,
+      builder: (sheetContext) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
         expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                dataset.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _StatusBadge(status: dataset.status),
-              const SizedBox(height: 24),
-              _DetailRow(label: 'Type', value: dataset.type.name),
-              _DetailRow(label: 'Files', value: '${dataset.fileCount}'),
-              _DetailRow(
-                label: 'Path',
-                value: dataset.path.isNotEmpty ? dataset.path : 'N/A',
-              ),
-              _DetailRow(
-                label: 'Created',
-                value: dataset.createdAt.toString().substring(0, 19),
-              ),
-            ],
+        builder: (sheetCtx, scrollController) => Consumer(
+          builder: (sheetCtx, ref, _) => _DatasetDetailsContent(
+            dataset: dataset,
+            scrollController: scrollController,
+            onPreview: () => _showDataPreview(context, ref),
           ),
         ),
       ),
+    );
+  }
+
+  void _showDataPreview(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _DataPreviewDialog(dataset: dataset),
     );
   }
 
@@ -833,5 +808,202 @@ class _AddDatasetDialogState extends ConsumerState<_AddDatasetDialog> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+}
+
+class _DatasetDetailsContent extends StatelessWidget {
+  final Dataset dataset;
+  final ScrollController scrollController;
+  final VoidCallback onPreview;
+
+  const _DatasetDetailsContent({
+    required this.dataset,
+    required this.scrollController,
+    required this.onPreview,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: scrollController,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            dataset.name,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          _StatusBadge(status: dataset.status),
+          const SizedBox(height: 24),
+          _DetailRow(label: 'Type', value: dataset.type.name),
+          _DetailRow(label: 'Files', value: '${dataset.fileCount}'),
+          _DetailRow(
+            label: 'Path',
+            value: dataset.path.isNotEmpty ? dataset.path : 'N/A',
+          ),
+          _DetailRow(
+            label: 'Created',
+            value: dataset.createdAt.toString().substring(0, 19),
+          ),
+          const SizedBox(height: 24),
+          if (dataset.type == DatasetType.image && dataset.fileCount > 0) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onPreview,
+                icon: const Icon(Icons.preview),
+                label: const Text('Preview Images'),
+              ),
+            ),
+          ] else if (dataset.type == DatasetType.text &&
+              dataset.fileCount > 0) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onPreview,
+                icon: const Icon(Icons.preview),
+                label: const Text('Preview Text'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DataPreviewDialog extends ConsumerStatefulWidget {
+  final Dataset dataset;
+
+  const _DataPreviewDialog({required this.dataset});
+
+  @override
+  ConsumerState<_DataPreviewDialog> createState() => _DataPreviewDialogState();
+}
+
+class _DataPreviewDialogState extends ConsumerState<_DataPreviewDialog> {
+  List<String> _previewItems = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreview();
+  }
+
+  Future<void> _loadPreview() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) {
+      setState(() {
+        _previewItems = List.generate(
+          widget.dataset.fileCount > 10 ? 10 : widget.dataset.fileCount,
+          (i) => 'Sample item ${i + 1}',
+        );
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Preview: ${widget.dataset.name}'),
+      content: SizedBox(
+        width: 400,
+        height: 300,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : widget.dataset.type == DatasetType.image
+            ? _buildImagePreview()
+            : widget.dataset.type == DatasetType.text
+            ? _buildTextPreview()
+            : _buildMixedPreview(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePreview() {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: _previewItems.length,
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Center(
+            child: Icon(Icons.image, color: Colors.grey[400], size: 32),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTextPreview() {
+    return ListView.separated(
+      itemCount: _previewItems.length,
+      separatorBuilder: (_, __) => const Divider(),
+      itemBuilder: (context, index) {
+        return ListTile(
+          dense: true,
+          leading: const Icon(Icons.text_snippet),
+          title: Text(
+            'Text sample ${index + 1}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            'This is sample text content for preview...',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMixedPreview() {
+    return ListView.separated(
+      itemCount: _previewItems.length,
+      separatorBuilder: (_, __) => const Divider(),
+      itemBuilder: (context, index) {
+        final isImage = index % 2 == 0;
+        return ListTile(
+          dense: true,
+          leading: Icon(isImage ? Icons.image : Icons.text_snippet),
+          title: Text(
+            isImage ? 'Image sample ${index + 1}' : 'Text sample ${index + 1}',
+          ),
+        );
+      },
+    );
   }
 }
