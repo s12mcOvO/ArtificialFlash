@@ -140,8 +140,10 @@ class _ModelConfigPageState extends ConsumerState<ModelConfigPage> {
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.architecture),
               ),
-              items: _getModelTypeOptions().map((type) {
-                return DropdownMenuItem(
+              items: _getModelTypeOptions().map<DropdownMenuItem<String>>((
+                type,
+              ) {
+                return DropdownMenuItem<String>(
                   value: type,
                   child: Text(_formatModelType(type)),
                 );
@@ -186,7 +188,7 @@ class _ModelConfigPageState extends ConsumerState<ModelConfigPage> {
                     prefixIcon: Icon(Icons.folder),
                   ),
                   items: data
-                      .map(
+                      .map<DropdownMenuItem<String>>(
                         (Dataset dataset) => DropdownMenuItem<String>(
                           value: dataset.id,
                           child: Text(dataset.name),
