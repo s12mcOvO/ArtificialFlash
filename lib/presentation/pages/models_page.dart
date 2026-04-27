@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:artificial_flash/presentation/providers/model_provider.dart';
+import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/domain/entities/model.dart';
 import 'package:artificial_flash/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -161,10 +162,10 @@ class _ModelCard extends ConsumerWidget {
                     onSelected: (value) {
                       switch (value) {
                         case 'test':
-                          _showTestDialog(context);
+                          _showTestDialog(context, ref);
                           break;
                         case 'export':
-                          _showExportDialog(context);
+                          _showExportDialog(context, ref);
                           break;
                         case 'delete':
                           _showDeleteConfirmation(context, ref);
@@ -348,32 +349,170 @@ class _ModelCard extends ConsumerWidget {
     );
   }
 
-  void _showTestDialog(BuildContext context) {
+  void _showTestDialog(BuildContext context, WidgetRef ref) {
+    final textController = TextEditingController();
+    final imageController = TextEditingController();
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Test Model'),
-        content: const Text(
-          'This feature allows you to test your trained model with sample inputs.',
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Test ${_formatModelType(model.type)} Model'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_getTestInstructions(model.type)),
+              const SizedBox(height: 16),
+              if (model.type.contains('text') || model.type.contains('nlp'))
+                TextField(
+                  controller: textController,
+                  maxLines: 4,
+                  decoration: const InputDecoration(
+                    labelText: 'Input Text',
+                    hintText: 'Enter text to classify/analyze',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              if (model.type.contains('image') || model.type.contains('visual'))
+                TextField(
+                  controller: imageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Image Path',
+                    hintText: '/path/to/image.jpg',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.image),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _runTest(
+                    context,
+                    ref,
+                    text: textController.text,
+                    imagePath: imageController.text,
+                  );
+                },
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Run Test'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Select Input'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
           ),
         ],
       ),
     );
   }
 
-  void _showExportDialog(BuildContext context) {
+  String _getTestInstructions(String type) {
+    if (type.contains('text_classification')) {
+      return 'Enter text to classify into categories.';
+    } else if (type.contains('sentiment_analysis')) {
+      return 'Enter text for sentiment analysis (positive/negative).';
+    } else if (type.contains('question_answering')) {
+      return 'Enter a question to get an answer from the model.';
+    } else if (type.contains('image_classification')) {
+      return 'Provide image path to classify the image.';
+    } else if (type.contains('object_detection')) {
+      return 'Provide image path to detect objects.';
+    }
+    return 'Enter input data to test the model.';
+  }
+
+  Future<void> _runTest(
+    BuildContext context,
+    WidgetRef ref, {
+    String text = '',
+    String imagePath = '',
+  }) async {
+    final inputData = {
+      if (text.isNotEmpty) 'text': text,
+      if (imagePath.isNotEmpty) 'image_path': imagePath,
+    };
+
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Running inference on ${model.name}...')),
+      );
+
+      final api = ref.read(apiServiceProvider);
+      final response = await api.post(
+        '/inference/predict',
+        data: {'model_id': model.id, 'input_data': inputData},
+      );
+
+      if (context.mounted) {
+        _showTestResult(context, response.data);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Test failed: $e')));
+      }
+    }
+  }
+
+  void _showTestResult(BuildContext context, Map<String, dynamic> result) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        title: const Text('Test Result'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.success.withAlpha(26),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: AppColors.success),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Prediction: ${result['prediction']?['class'] ?? 'unknown'}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.speed, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  'Confidence: ${((result['prediction']?['confidence'] ?? 0) * 100).toStringAsFixed(1)}%',
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showExportDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Export Model'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -383,23 +522,23 @@ class _ModelCard extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.android),
               title: const Text('TensorFlow Lite (.tflite)'),
-              onTap: () => _startExport(context, 'tflite'),
+              onTap: () => _startExport(context, ref, 'tflite'),
             ),
             ListTile(
               leading: const Icon(Icons.cloud),
               title: const Text('ONNX (.onnx)'),
-              onTap: () => _startExport(context, 'onnx'),
+              onTap: () => _startExport(context, ref, 'onnx'),
             ),
             ListTile(
               leading: const Icon(Icons.code),
               title: const Text('PyTorch (.pt)'),
-              onTap: () => _startExport(context, 'pt'),
+              onTap: () => _startExport(context, ref, 'pt'),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
         ],
@@ -407,47 +546,23 @@ class _ModelCard extends ConsumerWidget {
     );
   }
 
-  void _startExport(BuildContext context, String format) {
+  void _startExport(BuildContext context, WidgetRef ref, String format) async {
     Navigator.pop(context);
-    _showExportProgress(context, format);
-  }
 
-  void _showExportProgress(BuildContext context, String format) {
-    double progress = 0.0;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setState) {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              if (progress < 1.0) {
-                setState(() => progress += 0.1);
-                _showExportProgress(dialogContext, format);
-              } else {
-                Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Model exported as .$format successfully'),
-                  ),
-                );
-              }
-            });
-            return AlertDialog(
-              title: Text('Exporting as .$format'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: 16),
-                  Text('${(progress * 100).toStringAsFixed(0)}%'),
-                ],
-              ),
-            );
-          },
+    try {
+      await ref.read(modelsProvider.notifier).exportModel(model.id, format);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Model exported as .$format successfully')),
         );
-      },
-    );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+      }
+    }
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
