@@ -16,7 +16,6 @@ class TrainingPage extends ConsumerStatefulWidget {
 }
 
 class _TrainingPageState extends ConsumerState<TrainingPage> {
-  Model? _selectedModel;
   TrainingMode _selectedMode = TrainingMode.local;
 
   @override
@@ -25,6 +24,7 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     final trainingSession = ref.watch(trainingSessionProvider);
     final connectionConfig = ref.watch(connectionConfigProvider);
     final isTraining = ref.watch(isTrainingProvider);
+    final selectedModel = ref.watch(selectedModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +49,12 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTrainingConfig(models, connectionConfig, isTraining),
+            _buildTrainingConfig(
+              models,
+              connectionConfig,
+              isTraining,
+              selectedModel,
+            ),
             const SizedBox(height: 16),
             if (isTraining || trainingSession.value != null) ...[
               _buildProgressSection(trainingSession),
@@ -69,6 +74,7 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     AsyncValue<List<Model>> models,
     ConnectionConfig connectionConfig,
     bool isTraining,
+    Model? selectedModel,
   ) {
     return Card(
       child: Padding(
@@ -101,21 +107,28 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
                   );
                 }
 
+                final currentSelected = pendingModels.contains(selectedModel)
+                    ? selectedModel
+                    : (pendingModels.isNotEmpty ? pendingModels.first : null);
+
                 return DropdownButtonFormField<Model>(
-                  value: _selectedModel,
+                  value: currentSelected,
                   decoration: const InputDecoration(
                     labelText: 'Select Model',
                     prefixIcon: Icon(Icons.model_training),
                   ),
-                  items: pendingModels.map((model) {
-                    return DropdownMenuItem(
+                  items: pendingModels.map<DropdownMenuItem<Model>>((model) {
+                    return DropdownMenuItem<Model>(
                       value: model,
                       child: Text(model.name),
                     );
                   }).toList(),
                   onChanged: isTraining
                       ? null
-                      : (value) => setState(() => _selectedModel = value),
+                      : (value) {
+                          ref.read(selectedModelProvider.notifier).state =
+                              value;
+                        },
                 );
               },
             ),
@@ -169,9 +182,9 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isTraining || _selectedModel == null
+                onPressed: isTraining || selectedModel == null
                     ? null
-                    : _startTraining,
+                    : () => _startTraining(selectedModel),
                 icon: const Icon(Icons.play_arrow),
                 label: Text(
                   isTraining ? 'Training in Progress...' : 'Start Training',
@@ -442,12 +455,10 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     );
   }
 
-  void _startTraining() {
-    if (_selectedModel == null) return;
-
+  void _startTraining(Model model) {
     ref
         .read(trainingSessionProvider.notifier)
-        .startTraining(model: _selectedModel!, mode: _selectedMode);
+        .startTraining(model: model, mode: _selectedMode);
   }
 
   void _stopTraining() {
