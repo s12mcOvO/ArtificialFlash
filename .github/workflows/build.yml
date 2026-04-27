@@ -62,7 +62,7 @@ jobs:
         run: flutter pub get
 
       - name: Analyze code
-        run: flutter analyze || true
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings || exit 0
 
       - name: Build Linux
         if: matrix.platform == 'linux'
