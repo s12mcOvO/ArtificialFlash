@@ -64,6 +64,10 @@ class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
           'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz',
       'size': 26,
     },
+    'WanJuan2.0': {
+      'url': 'https://opendatalab.org.cn/OpenDataLab/WanJuanCC',
+      'size': 500000,
+    },
     'IMDB Reviews': {
       'url': 'http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz',
       'size': 80,

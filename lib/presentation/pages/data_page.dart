@@ -666,6 +666,12 @@ class _BuiltInTab extends StatelessWidget {
         'size': '~30MB',
       },
       {
+        'name': 'WanJuan2.0',
+        'description': 'Chinese web corpus (100B tokens)',
+        'type': 'text',
+        'size': '~500GB',
+      },
+      {
         'name': 'IMDB Reviews',
         'description': 'Movie review sentiment data',
         'type': 'text',
