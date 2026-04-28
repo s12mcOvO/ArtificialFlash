@@ -89,10 +89,6 @@ jobs:
             build/macos/Build/Products/Release/**
             build/windows/x64/runner/Release/**
             build/app/outputs/flutter-apk/**
-            backend/**
-            requirements.txt
-            LICENSE
-            README.md
           retention-days: 5
 
   release:
