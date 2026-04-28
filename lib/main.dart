@@ -20,7 +20,7 @@ class ArtificialFlashApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'ArtificialFlash',
+      title: 'ArtificialFlash 能工智人',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -37,3 +37,25 @@ class ArtificialFlashApp extends ConsumerWidget {
     );
   }
 }
+
+/// ===========================================================
+/// QUICK START GUIDE
+/// ===========================================================
+///
+/// To run the full application with backend:
+///
+/// 1. Start the backend server:
+///    cd backend
+///    pip install -r requirements.txt
+///    python main.py
+///
+/// 2. In another terminal, run Flutter:
+///    flutter run
+///
+/// Or use the convenience script:
+///    ./start.sh
+///
+/// Default backend runs at: http://localhost:8000
+/// API documentation: http://localhost:8000/docs
+///
+/// ===========================================================
