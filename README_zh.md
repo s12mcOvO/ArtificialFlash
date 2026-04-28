@@ -5,10 +5,6 @@
 ![平台](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20Android%20%7C%20iOS-blue)
 ![许可证](https://img.shields.io/badge/license-Apache%202.0-green)
 
-## 许可证
-
-本项目基于 Apache 许可证 2.0 版本授权。详见 [LICENSE](LICENSE)。
-
 ## 功能特点
 
 ### 🎯 核心功能
@@ -16,7 +12,7 @@
 - **模型配置**：视觉、NLP、生成式和自定义模型
 - **训练控制**：开始/暂停/停止，支持本地或远程训练
 - **实时监控**：实时进度、损失曲线、训练日志
-- **模型管理**：查看、测试、导出（ONNX/TFLite）、删除模型
+- **模型管理**：查看、测试、导出（ONNX/TFLite/PyTorch）、删除模型
 
 ### 🎨 自定义
 - **主题**：浅色 / 深色 / 跟随系统
@@ -34,10 +30,10 @@
 ## 快速开始
 
 ### 环境要求
-- Flutter SDK 3.x
-- Python 3.8+（可选，用于后端）
+- Flutter SDK 3.41+
+- Python 3.10+（后端）
 
-### 快速启动
+### 本地运行
 
 ```bash
 # 克隆仓库
@@ -51,13 +47,20 @@ flutter pub get
 flutter run
 ```
 
-### 运行后端（可选）
+### 运行后端
 
 ```bash
+# 进入后端目录
 cd backend
+
+# 安装依赖
 pip install -r requirements.txt
+
+# 启动服务
 python main.py
 ```
+
+后端默认运行在 http://localhost:8000
 
 ## 项目结构
 
@@ -65,40 +68,45 @@ python main.py
 lib/
 ├── core/               # 核心工具
 │   ├── constants/     # 应用常量
-│   ├── network/       # API 和 WebSocket
-│   ├── theme/        # Material 主题
-│   └── utils/        # 本地存储
+│   ├── network/       # API 服务
+│   ├── theme/         # 主题
+│   └── utils/         # 本地存储
 ├── domain/
 │   └── entities/     # 数据模型
-├── l10n/             # 本地化
+├── l10n/              # 本地化
 └── presentation/
-    ├── pages/        # 界面页面
-    ├── providers/   # 状态管理
-    └── widgets/     # 可复用组件
+    ├── pages/         # 界面页面
+    ├── providers      # 状态管理
+    └── widgets       # 可复用组件
 
-backend/              # Python FastAPI 服务端
+backend/               # Python FastAPI 后端
+├── main.py           # FastAPI 服务入口
+└── training_manager.py  # 训练管理器
 ```
 
 ## 界面预览
 
-### 桌面端 UI
+### 桌面端
 - 左侧边栏导航
 - 实时训练进度
 - 损失曲线可视化
 
-### 移动端 UI
+### 移动端
 - 底部导航栏
 - 响应式布局
 
 ## 技术栈
 
-- **前端**：Flutter 3.x、Riverpod、WebSocket、Dio
-- **后端**：FastAPI、WebSocket、PyTorch/TensorFlow
-- **存储**：本地文件系统、SharedPreferences
+| 分类 | 技术 |
+|------|------|
+| 前端 | Flutter 3.41+, Riverpod, Dio, WebSocket |
+| 后端 | FastAPI, WebSocket, AsyncIO |
+| 图表 | fl_chart |
+| 文件 | file_picker, path_provider |
 
 ## 许可证
 
-MIT 许可证 - 详见 [LICENSE](LICENSE)。
+本项目基于 Apache License 2.0 协议开源。详见 [LICENSE](LICENSE)。
 
 ---
 
