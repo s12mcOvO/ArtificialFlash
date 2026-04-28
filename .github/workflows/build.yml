@@ -14,7 +14,18 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+          - os: windows-latest
+            platform: windows
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,9 +38,13 @@ jobs:
           cache: true
 
       - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libblkid-dev liblzma-dev
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
       - name: Get dependencies
         run: flutter pub get
@@ -40,17 +55,40 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Build Windows
+        run: flutter build windows --release
+
       - name: Build Android APK
         run: flutter build apk --release
 
-      - name: Upload Linux artifacts
+      - name: Upload Linux
+        if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: linux-release
           path: build/linux/x64/release/bundle/**
           retention-days: 5
 
-      - name: Upload Android artifacts
+      - name: Upload macOS
+        if: matrix.platform == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: build/macos/Build/Products/Release/**
+          retention-days: 5
+
+      - name: Upload Windows
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: build/windows/x64/runner/Release/**
+          retention-days: 5
+
+      - name: Upload Android
         uses: actions/upload-artifact@v4
         with:
           name: android-release
@@ -67,17 +105,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Linux artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-release
-          path: linux-release
-
-      - name: Download Android artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: android-release
-          path: android-release
+          path: artifacts
 
       - name: Get tag version
         id: get_tag
@@ -92,7 +123,9 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            linux-release/**
-            android-release/**
+            artifacts/linux-release/**
+            artifacts/macos-release/**
+            artifacts/windows-release/**
+            artifacts/android-release/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
