@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,8 +7,33 @@ import 'package:artificial_flash/presentation/pages/main_shell.dart';
 import 'package:artificial_flash/presentation/providers/settings_provider.dart';
 import 'package:artificial_flash/l10n/app_localizations.dart';
 
-void main() {
+Future<void> _launchBackend() async {
+  try {
+    final execDir = Directory.current;
+    final beDir = Directory('${execDir.path}/backend');
+
+    if (!await beDir.exists()) {
+      return;
+    }
+
+    Process.start(
+      Platform.isWindows ? 'python' : 'python3',
+      ['main.py'],
+      workingDirectory: beDir.path,
+      runInShell: true,
+    );
+  } catch (_) {
+    // Silently fail if backend can't be started
+  }
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    _launchBackend();
+  }
+
   runApp(const ProviderScope(child: ArtificialFlashApp()));
 }
 
@@ -37,25 +63,3 @@ class ArtificialFlashApp extends ConsumerWidget {
     );
   }
 }
-
-/// ===========================================================
-/// QUICK START GUIDE
-/// ===========================================================
-///
-/// To run the full application with backend:
-///
-/// 1. Start the backend server:
-///    cd backend
-///    pip install -r requirements.txt
-///    python main.py
-///
-/// 2. In another terminal, run Flutter:
-///    flutter run
-///
-/// Or use the convenience script:
-///    ./start.sh
-///
-/// Default backend runs at: http://localhost:8000
-/// API documentation: http://localhost:8000/docs
-///
-/// ===========================================================
