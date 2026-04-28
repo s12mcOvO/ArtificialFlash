@@ -3,7 +3,11 @@
 A beginner-friendly AI model training assistant built with Flutter. Supports Visual, NLP, and Generative models with local and remote training capabilities.
 
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows%20%7C%20Android%20%7C%20iOS-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-Apache%202.0-green)
+
+## License
+
+This project is licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
 
 ## Features
 
