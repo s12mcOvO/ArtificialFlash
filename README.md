@@ -1,4 +1,4 @@
-# ArtificialFlash 🧠
+# ArtificialFlash 🧠 能工智人
 
 A beginner-friendly AI model training assistant built with Flutter. Supports Visual, NLP, and Generative models with local and remote training capabilities.
 
