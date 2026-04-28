@@ -969,7 +969,7 @@ class _DataPreviewDialogState extends ConsumerState<_DataPreviewDialog> {
   Widget _buildTextPreview() {
     return ListView.separated(
       itemCount: _previewItems.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         return ListTile(
           dense: true,
@@ -993,7 +993,7 @@ class _DataPreviewDialogState extends ConsumerState<_DataPreviewDialog> {
   Widget _buildMixedPreview() {
     return ListView.separated(
       itemCount: _previewItems.length,
-      separatorBuilder: (_, __) => const Divider(),
+      separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final isImage = index % 2 == 0;
         return ListTile(
