@@ -165,11 +165,36 @@ async def delete_model(model_id: str):
     return {"message": "Model deleted"}
 
 @app.post("/api/v1/models/{model_id}/export")
-async def export_model(model_id: str, format: str):
+async def export_model(model_id: str, format: str = "onnx"):
     if model_id not in models_db:
         raise HTTPException(status_code=404, detail="Model not found")
     
     model = models_db[model_id]
+    
+    # Find the training session for this model
+    session_id = None
+    for sid, session in training_manager.active_sessions.items():
+        if session.get('model_id') == model_id:
+            session_id = sid
+            break
+    
+    if session_id:
+        # Export the trained model
+        export_path = training_manager.export_model(session_id, format)
+        
+        model['status'] = 'exported'
+        model['export_format'] = format
+        model['exported_at'] = datetime.now().isoformat()
+        
+        if export_path:
+            model['model_path'] = export_path
+            return {
+                "message": f"Model exported as {format}",
+                "model": model,
+                "export_path": export_path
+            }
+    
+    # Fallback if no training session found
     model['status'] = 'exported'
     model['export_format'] = format
     model['exported_at'] = datetime.now().isoformat()
