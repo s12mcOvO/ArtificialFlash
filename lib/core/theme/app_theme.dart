@@ -102,7 +102,8 @@ class AppTheme {
 
       // Cards
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: 2,
+        shadowColor: Colors.black26,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: Colors.grey.shade200),
@@ -115,7 +116,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          elevation: 0,
+          elevation: 2,
+          shadowColor: AppColors.primary.withAlpha(128),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -128,7 +130,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: BorderSide(color: AppColors.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -226,11 +228,13 @@ class AppTheme {
       ),
 
       // Floating action button
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: CircleBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        focusElevation: 6,
+        hoverElevation: 8,
       ),
 
       // Chips
@@ -366,7 +370,8 @@ class AppTheme {
 
       // Cards
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: 2,
+        shadowColor: Colors.black54,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: Colors.grey.shade800),
@@ -379,7 +384,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryLight,
           foregroundColor: AppColors.primaryDark,
-          elevation: 0,
+          elevation: 2,
+          shadowColor: AppColors.primaryLight.withAlpha(77),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -490,11 +496,13 @@ class AppTheme {
       ),
 
       // Floating action button
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.accentLight,
         foregroundColor: AppColors.accentDark,
         elevation: 4,
-        shape: CircleBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        focusElevation: 6,
+        hoverElevation: 8,
       ),
 
       // Chips
