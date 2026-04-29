@@ -14,6 +14,18 @@ from pathlib import Path
 from datetime import datetime
 import uuid
 
+# Try to import optional dependencies
+try:
+    import torch
+    TORCH_VERSION = torch.__version__
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_VERSION = None
+    TORCH_AVAILABLE = False
+except Exception:
+    TORCH_VERSION = None
+    TORCH_AVAILABLE = False
+
 from training_manager import training_manager
 
 app = FastAPI(title="ArtificialFlash API", version="1.0.0")
@@ -86,7 +98,12 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "pytorch_available": TORCH_AVAILABLE,
+        "pytorch_version": TORCH_VERSION,
+        "active_training_sessions": len(training_manager.active_sessions),
+        "models_count": len(models_db),
+        "datasets_count": len(datasets_db)
     }
 
 # ==================== Datasets ====================
@@ -350,68 +367,37 @@ async def predict(model_id: str, input_data: Dict[str, Any]):
     if model['status'] != 'ready':
         raise HTTPException(status_code=400, detail="Model is not ready for inference")
     
-    try:
-        import torch
-        from models import create_model
+    result = {"class": "unknown", "confidence": 0.95}
+    
+    # Keyword-based sentiment analysis
+    if 'text' in input_data:
+        text = input_data['text']
+        positive_words = ['good', 'great', 'excellent', 'amazing', 'love', 'best', 'wonderful']
+        negative_words = ['bad', 'terrible', 'awful', 'hate', 'worst', 'poor', 'horrible']
         
-        # Get model config
-        model_type = model.get('type', 'image_classification')
+        text_lower = text.lower()
+        pos_count = sum(1 for w in positive_words if w in text_lower)
+        neg_count = sum(1 for w in negative_words if w in text_lower)
         
-        # Create a temporary model for inference
-        pytorch_model = create_model(model_type, num_classes=10)
-        
-        # Load weights if available
-        model_path = model.get('model_path')
-        if model_path and torch.os.path.exists(model_path):
-            pytorch_model.load_state_dict(torch.load(model_path))
-        
-        pytorch_model.eval()
-        
-        # Process input
-        result = {"class": "unknown", "confidence": 0.95}
-        
-        # Run inference if we have input data
-        if 'text' in input_data:
-            # Text input
-            text = input_data['text']
-            # Simple sentiment based on keywords
-            positive_words = ['good', 'great', 'excellent', 'amazing', 'love', 'best', 'wonderful']
-            negative_words = ['bad', 'terrible', 'awful', 'hate', 'worst', 'poor', 'horrible']
-            
-            text_lower = text.lower()
-            pos_count = sum(1 for w in positive_words if w in text_lower)
-            neg_count = sum(1 for w in negative_words if w in text_lower)
-            
-            if pos_count > neg_count:
-                result = {"class": "positive", "confidence": min(0.95, 0.5 + pos_count * 0.15)}
-            elif neg_count > pos_count:
-                result = {"class": "negative", "confidence": min(0.95, 0.5 + neg_count * 0.15)}
-            else:
-                result = {"class": "neutral", "confidence": 0.6}
-        
-        elif 'image_path' in input_data:
-            # Image input - return mock classification
-            classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-            result = {
-                "class": classes[hash(input_data['image_path']) % 10],
-                "confidence": 0.85
-            }
-        
-        return {
-            "model_id": model_id,
-            "prediction": result,
-            "timestamp": datetime.now().isoformat()
+        if pos_count > neg_count:
+            result = {"class": "positive", "confidence": min(0.95, 0.5 + pos_count * 0.15)}
+        elif neg_count > pos_count:
+            result = {"class": "negative", "confidence": min(0.95, 0.5 + neg_count * 0.15)}
+        else:
+            result = {"class": "neutral", "confidence": 0.6}
+    
+    elif 'image_path' in input_data:
+        classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        result = {
+            "class": classes[hash(input_data['image_path']) % 10],
+            "confidence": 0.85
         }
-    except Exception as e:
-        # Fallback to simple response
-        return {
-            "model_id": model_id,
-            "prediction": {
-                "class": "unknown",
-                "confidence": 0.95
-            },
-            "timestamp": datetime.now().isoformat()
-        }
+    
+    return {
+        "model_id": model_id,
+        "prediction": result,
+        "timestamp": datetime.now().isoformat()
+    }
 
 if __name__ == "__main__":
     import uvicorn
