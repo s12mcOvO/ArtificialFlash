@@ -4,6 +4,7 @@ import 'package:artificial_flash/core/theme/app_theme.dart';
 import 'package:artificial_flash/presentation/pages/home_page.dart';
 import 'package:artificial_flash/presentation/providers/connection_provider.dart';
 import 'package:artificial_flash/presentation/pages/data_page.dart';
+import 'package:artificial_flash/presentation/pages/data_marketplace_page.dart';
 import 'package:artificial_flash/presentation/pages/model_config_page.dart';
 import 'package:artificial_flash/presentation/pages/training_page.dart';
 import 'package:artificial_flash/presentation/pages/models_page.dart';
@@ -22,6 +23,7 @@ class MainShell extends ConsumerWidget {
     final pages = [
       const HomePage(),
       const DataPage(),
+      const DataMarketplacePage(),
       const ModelConfigPage(),
       const TrainingPage(),
       const ModelsPage(),
@@ -56,6 +58,11 @@ class MainShell extends ConsumerWidget {
                 icon: const Icon(Icons.folder_outlined),
                 selectedIcon: const Icon(Icons.folder),
                 label: l10n.data,
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.cloud_download_outlined),
+                selectedIcon: const Icon(Icons.cloud_download),
+                label: 'Market',
               ),
               NavigationDestination(
                 icon: const Icon(Icons.model_training_outlined),
@@ -404,25 +411,32 @@ class _DesktopShell extends ConsumerWidget {
                             ref.read(currentIndexProvider.notifier).state = 1,
                       ),
                       _NavItem(
-                        icon: Icons.model_training,
-                        label: l10n.model,
+                        icon: Icons.cloud_download,
+                        label: 'Market',
                         isSelected: currentIndex == 2,
                         onTap: () =>
                             ref.read(currentIndexProvider.notifier).state = 2,
                       ),
                       _NavItem(
-                        icon: Icons.play_circle,
-                        label: l10n.train,
+                        icon: Icons.model_training,
+                        label: l10n.model,
                         isSelected: currentIndex == 3,
                         onTap: () =>
                             ref.read(currentIndexProvider.notifier).state = 3,
                       ),
                       _NavItem(
-                        icon: Icons.storage,
-                        label: l10n.models,
+                        icon: Icons.play_circle,
+                        label: l10n.train,
                         isSelected: currentIndex == 4,
                         onTap: () =>
                             ref.read(currentIndexProvider.notifier).state = 4,
+                      ),
+                      _NavItem(
+                        icon: Icons.storage,
+                        label: l10n.models,
+                        isSelected: currentIndex == 5,
+                        onTap: () =>
+                            ref.read(currentIndexProvider.notifier).state = 5,
                       ),
                     ],
                   ),
@@ -436,7 +450,7 @@ class _DesktopShell extends ConsumerWidget {
                       _NavItem(
                         icon: Icons.settings,
                         label: l10n.settings,
-                        isSelected: false,
+                        isSelected: currentIndex == 6,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
