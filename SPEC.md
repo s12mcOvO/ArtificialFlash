@@ -3,44 +3,42 @@
 ## 1. Project Overview
 
 **Project Name**: ArtificialFlash (能工智人)  
-**Project Type**: Cross-platform Flutter Application (Desktop & Mobile)  
+**Project Type**: Windows Desktop Application (C++/WinRT WinUI 3)  
 **Core Functionality**: A beginner-friendly AI model training assistant that allows users to select datasets, configure models, control training processes, monitor progress, and manage trained models through an intuitive UI.
 
 ## 2. Technology Stack
 
-### Frontend (Flutter)
+### Frontend (WinUI 3)
 | Category | Technology |
 |----------|------------|
-| Framework | Flutter 3.41+ |
-| State Management | Riverpod |
-| HTTP Client | Dio |
-| Real-time | WebSocket |
-| Architecture | Clean Architecture |
-| Storage | Local file system + SharedPreferences |
+| UI Framework | WinUI 3 (Windows App SDK) |
+| Language | C++/WinRT |
+| Architecture | MVVM (Model-View-ViewModel) |
+| Data Binding | x:Bind, {Binding} |
+| Charts | Custom Canvas rendering |
+| Storage | Windows.Storage |
 
-### Backend (Python)
+### Backend (C++)
 | Category | Technology |
 |----------|------------|
-| Framework | FastAPI |
-| Server | Uvicorn |
-| Async | AsyncIO |
-| WebSocket | Native |
+| Neural Networks | Pure C++ implementation |
+| Training Manager | Async thread-based training |
+| Image Processing | Direct2D / WIC |
 
-### Cross-platform Support
-| Platform | Local Training | Remote Training |
-|----------|:--------------:|:---------------:|
-| Linux | ✅ | ✅ |
-| macOS | ✅ | ✅ |
-| Windows | ✅ | ✅ |
-| Android | ❌ | ✅ |
-| iOS | ❌ | ✅ |
+### Platform Support
+| Feature | Support |
+|---------|:-------:|
+| Windows 10 (1809+) | ✅ |
+| Windows 11 | ✅ |
+| Local Training | ✅ |
+| Remote Training | ❌ (planned) |
 
 ## 3. Features
 
 ### 3.1 Data Management
-- 📁 Local file upload (drag & drop supported on desktop)
+- 📁 Local file upload
 - 🔗 URL dataset download
-- 📦 Built-in datasets (MNIST, CIFAR-10, Fashion-MNIST, WanJuan2.0, IMDB, SST-2)
+- 📦 Built-in datasets (MNIST, CIFAR-10, Fashion-MNIST)
 - 👁️ Data preview and details
 
 ### 3.2 Model Configuration
@@ -58,12 +56,12 @@
 
 ### 3.3 Training Control
 - ▶️ Start / ⏸️ Pause / ⏹️ Stop training
-- 🖥️ Training mode: Local or Remote server
+- 🖥️ Training mode: Local only
 - 💾 Configuration persistence
 
 ### 3.4 Progress Monitoring
 - 📊 Real-time training progress
-- 📈 Loss curve visualization (fl_chart)
+- 📈 Loss curve visualization (Canvas)
 - 📋 Training logs streaming
 - 🎯 Metrics (loss, accuracy)
 
@@ -76,12 +74,11 @@
 ### 3.6 Settings
 - 🎨 **Appearance**: Light / Dark / System theme
 - 🌐 **Language**: English, Chinese (简体中文)
-- 🔌 Server connection configuration and testing
 
 ## 4. UI/UX Design
 
 ### Visual Style
-- Material Design 3
+- WinUI 3 (Fluent Design)
 - Beginner-friendly with guided steps
 
 ### Color Scheme
@@ -93,10 +90,8 @@
 | Success | Green (#388E3C) |
 | Error | Red (#D32F2F) |
 
-### Layout
-- **Desktop (≥800px)**: Left sidebar navigation
-- **Tablet (600-800px)**: Collapsed rail navigation
-- **Mobile (<600px)**: Bottom navigation bar + drawer
+### Navigation
+- **Desktop**: Left sidebar navigation (NavigationView)
 
 ### Key Screens
 1. **Home**: Dashboard with quick actions, stats, getting started guide
@@ -104,67 +99,53 @@
 3. **Model**: Model configuration wizard
 4. **Train**: Training control center with real-time metrics
 5. **Models**: Trained model library
-6. **Settings**: Appearance, language, server configuration
+6. **Settings**: Appearance, language configuration
 
 ## 5. Project Structure
 
 ```
-lib/
-├── core/
-│   ├── constants/       # App constants (API, App, Model types)
-│   ├── network/        # API service (Dio)
-│   ├── theme/         # Material theme definitions
-│   └── utils/         # Local storage utilities
-├── domain/
-│   └── entities/     # Data models (Dataset, Model, Training)
-├── l10n/            # Localizations (en, zh)
-└── presentation/
-    ├── pages/        # UI screens (Home, Data, ModelConfig, Training, Models, Settings)
-    ├── providers/    # Riverpod state management
-    └── widgets/     # Reusable components
-
-backend/
-├── main.py            # FastAPI server entry
-├── training_manager.py # Training session management
-└── requirements.txt # Python dependencies
+winui3/
+├── ArtificialFlash.sln
+├── ArtificialFlash/
+│   ├── App.*                 # Application entry point
+│   ├── MainWindow.*          # Main window with NavigationView
+│   ├── Pages/                # UI pages
+│   │   ├── HomePage.*
+│   │   ├── DataPage.*
+│   │   ├── ModelConfigPage.*
+│   │   ├── TrainingPage.*
+│   │   ├── ModelsPage.*
+│   │   └── SettingsPage.*
+│   ├── ViewModels/           # MVVM ViewModels
+│   ├── Models/               # Data models
+│   ├── Backend/              # C++ backend
+│   │   ├── NeuralNetworks.*
+│   │   ├── TrainingManager.*
+│   │   └── BackendService.*
+│   ├── Controls/             # Custom controls
+│   │   ├── StatusBadge.*
+│   │   └── TrainingChart.*
+│   ├── Converters/           # Value converters
+│   └── Services/             # App services
 ```
 
 ## 6. Getting Started
 
 ### Prerequisites
-- Flutter SDK 3.41+
-- Python 3.10+ (for backend)
+- Visual Studio 2022
+- Windows SDK 10.0.22621.0
+- Windows 10 (version 1809+) or Windows 11
 
-### Run the App
-```bash
-# Install dependencies
-flutter pub get
-
-# Run on desktop
-flutter run -d linux
-# or
-flutter run -d macos
-# or
-flutter run -d windows
-
-# Run on mobile
-flutter run -d android
-flutter run -d ios
-```
-
-### Run the Backend
-```bash
-cd backend
-pip install -r requirements.txt
-python main.py
-# Server runs on http://localhost:8000
-```
+### Build and Run
+1. Open `winui3/ArtificialFlash.sln` in Visual Studio 2022
+2. Set `ArtificialFlash` as startup project
+3. Build and run (F5)
 
 ## 7. Data Storage
 
-- **Local Storage**: Models and datasets saved to app documents directory
-- **Settings**: Theme and language preferences stored in SharedPreferences
-- **Offline Support**: Full functionality without backend connection (local training simulation)
+- **Local Storage**: Models and datasets saved to app local folder
+- **Settings**: Theme and language preferences stored in ApplicationData
+- **Offline Support**: Full functionality without network connection
 
 ## 8. License
 
