@@ -5,6 +5,7 @@ class ApiService {
   late final Dio _dio;
   String _host = ApiConstants.defaultLocalHost;
   int _port = ApiConstants.defaultPort;
+  bool _useHttps = false;
 
   ApiService() {
     _dio = Dio(
@@ -16,13 +17,16 @@ class ApiService {
     );
   }
 
-  void updateConnection(String host, int port) {
+  void updateConnection(String host, int port, {bool useHttps = false}) {
     _host = host;
     _port = port;
+    _useHttps = useHttps;
   }
 
-  String get baseUrl =>
-      '${ApiConstants.httpProtocol}://$_host:$_port${ApiConstants.apiVersion}';
+  String get baseUrl {
+    final protocol = _useHttps ? 'https' : ApiConstants.httpProtocol;
+    return '$protocol://$_host:$_port${ApiConstants.apiVersion}';
+  }
 
   Future<Response<T>> get<T>(
     String path, {

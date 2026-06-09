@@ -271,8 +271,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _saveServerConfig() {
     final host = _hostController.text.trim();
-    final port =
-        int.tryParse(_portController.text.trim()) ?? ApiConstants.defaultPort;
+    final portInput = _portController.text.trim();
+    final port = int.tryParse(portInput);
+
+    if (host.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Host cannot be empty')),
+      );
+      return;
+    }
+
+    if (port == null || port < 1 || port > 65535) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Port must be between 1 and 65535')),
+      );
+      return;
+    }
 
     ref.read(connectionConfigProvider.notifier).updateHost(host);
     ref.read(connectionConfigProvider.notifier).updatePort(port);

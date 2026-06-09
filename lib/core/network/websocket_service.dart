@@ -12,6 +12,7 @@ class WebSocketService {
 
   String _host = ApiConstants.defaultLocalHost;
   int _port = ApiConstants.defaultPort;
+  bool _useTls = false;
   Timer? _reconnectTimer;
   bool _shouldReconnect = true;
 
@@ -20,9 +21,10 @@ class WebSocketService {
   ConnectionStatus _status = ConnectionStatus.disconnected;
   ConnectionStatus get status => _status;
 
-  void updateConnection(String host, int port) {
+  void updateConnection(String host, int port, {bool useTls = false}) {
     _host = host;
     _port = port;
+    _useTls = useTls;
   }
 
   Future<void> connect() async {
@@ -35,8 +37,9 @@ class WebSocketService {
     _statusController.add(_status);
 
     try {
+      final wsProtocol = _useTls ? 'wss' : ApiConstants.wsProtocol;
       final uri = Uri.parse(
-        '${ApiConstants.wsProtocol}://$_host:$_port${ApiConstants.wsEndpoint}',
+        '$wsProtocol://$_host:$_port${ApiConstants.wsEndpoint}',
       );
       _channel = WebSocketChannel.connect(uri);
 

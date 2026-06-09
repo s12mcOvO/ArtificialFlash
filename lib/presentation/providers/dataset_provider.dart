@@ -7,6 +7,36 @@ import 'package:artificial_flash/core/utils/local_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+final _datasetUrlAllowlist = [
+  'yann.lecun.com',
+  'www.cs.toronto.edu',
+  'fashion-mnist.s3-website.eu-central-1.amazonaws.com',
+  'opendatalab.org.cn',
+  'ai.stanford.edu',
+  'nlp.stanford.edu',
+];
+
+bool _isUrlAllowed(String url) {
+  try {
+    final uri = Uri.parse(url);
+    final host = uri.host.toLowerCase();
+    if (host == 'localhost' || host == '127.0.0.1' || host == '0.0.0.0') {
+      return false;
+    }
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      return false;
+    }
+    for (final allowed in _datasetUrlAllowlist) {
+      if (host == allowed || host.endsWith('.$allowed')) {
+        return true;
+      }
+    }
+    return false;
+  } catch (_) {
+    return false;
+  }
+}
+
 class DownloadProgress {
   final String datasetName;
   final double progress;
@@ -91,6 +121,11 @@ class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
       return;
     }
 
+    if (isUrl && !_isUrlAllowed(url)) {
+      state = state?.copyWith(error: 'URL not allowed. Only built-in dataset URLs are permitted for security.');
+      return;
+    }
+
     state = DownloadProgress(
       datasetName: isUrl ? 'URL Download' : name,
       isDownloading: true,
@@ -104,8 +139,14 @@ class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
 
       final httpClient = HttpClient();
       httpClient.connectionTimeout = const Duration(seconds: 30);
+      httpClient.autoUncompress = true;
 
-      final request = await httpClient.getUrl(Uri.parse(url));
+      final uri = Uri.parse(url);
+      if (uri.scheme == 'https') {
+        httpClient.badCertificateCallback = (cert, host, port) => false;
+      }
+
+      final request = await httpClient.getUrl(uri);
       final response = await request.close();
 
       final totalBytes = response.contentLength;
@@ -151,11 +192,16 @@ class DownloadProgressNotifier extends StateNotifier<DownloadProgress?> {
   }
 
   String _getFileNameFromUrl(String url) {
-    final uri = Uri.parse(url);
-    final pathSegments = uri.pathSegments;
-    if (pathSegments.isNotEmpty) {
-      return pathSegments.last;
-    }
+    try {
+      final uri = Uri.parse(url);
+      final pathSegments = uri.pathSegments;
+      if (pathSegments.isNotEmpty) {
+        final fileName = pathSegments.last;
+        if (RegExp(r'^[\w\.\-]+$').hasMatch(fileName)) {
+          return fileName;
+        }
+      }
+    } catch (_) {}
     return 'dataset_${DateTime.now().millisecondsSinceEpoch}';
   }
 

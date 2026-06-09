@@ -23,12 +23,14 @@ class ConnectionConfig {
   final int port;
   final bool isRemote;
   final bool isConnected;
+  final bool useTls;
 
   const ConnectionConfig({
     this.host = ApiConstants.defaultLocalHost,
     this.port = ApiConstants.defaultPort,
     this.isRemote = false,
     this.isConnected = false,
+    this.useTls = false,
   });
 
   ConnectionConfig copyWith({
@@ -36,12 +38,14 @@ class ConnectionConfig {
     int? port,
     bool? isRemote,
     bool? isConnected,
+    bool? useTls,
   }) {
     return ConnectionConfig(
       host: host ?? this.host,
       port: port ?? this.port,
       isRemote: isRemote ?? this.isRemote,
       isConnected: isConnected ?? this.isConnected,
+      useTls: useTls ?? this.useTls,
     );
   }
 }
@@ -54,11 +58,13 @@ class ConnectionConfigNotifier extends StateNotifier<ConnectionConfig> {
   }
 
   void updatePort(int port) {
-    state = state.copyWith(port: port);
+    if (port >= 1 && port <= 65535) {
+      state = state.copyWith(port: port);
+    }
   }
 
   void setRemote(bool isRemote) {
-    state = state.copyWith(isRemote: isRemote);
+    state = state.copyWith(isRemote: isRemote, useTls: isRemote);
   }
 
   void setConnected(bool isConnected) {

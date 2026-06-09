@@ -3,16 +3,20 @@ ArtificialFlash Backend - AI Training Assistant API Server
 FastAPI backend for model training with real PyTorch support.
 """
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Dict, Any, Optional
 import asyncio
 import json
 import os
+import re
 from pathlib import Path
 from datetime import datetime
 import uuid
+from collections import defaultdict
+import time
 
 # Try to import optional dependencies
 try:
@@ -30,15 +34,87 @@ from training_manager import training_manager
 
 app = FastAPI(title="ArtificialFlash API", version="1.0.0")
 
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_host = request.client.host if request.client else "unknown"
+    if not rate_limiter.is_allowed(client_host):
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Too many requests, please try again later."}
+        )
+    response = await call_next(request)
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory storage (replace with database in production)
+# ==================== Pydantic Models ====================
+
+class DatasetCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    path: str = Field(..., max_length=4096)
+    type: str = Field(..., pattern=r'^(image|text|mixed)$')
+
+    @field_validator('path')
+    @classmethod
+    def sanitize_path(cls, v: str) -> str:
+        # Remove null bytes and normalize
+        v = v.replace('\x00', '')
+        # Resolve to absolute path and ensure it stays within allowed dirs
+        p = Path(v).resolve()
+        # Prevent path traversal outside allowed directories
+        # Only allow paths under /tmp, /home, or current directory
+        allowed_prefixes = [
+            Path('/tmp').resolve(),
+            Path('/home').resolve(),
+            Path('.').resolve(),
+        ]
+        if not any(str(p).startswith(str(prefix)) for prefix in allowed_prefixes):
+            raise ValueError(f'Path must be in an allowed directory')
+        return str(p)
+
+
+class ModelCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    type: str = Field(..., pattern=r'^(image_classification|object_detection|image_segmentation|text_classification|sentiment_analysis|question_answering|text_to_image|image_to_image|custom)$')
+    base_model: Optional[str] = Field(None, max_length=200)
+    dataset_id: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+class PredictInput(BaseModel):
+    text: Optional[str] = Field(None, max_length=10000)
+    image_path: Optional[str] = Field(None, max_length=4096)
+
+
+# ==================== Rate Limiter ====================
+
+class RateLimiter:
+    def __init__(self, requests: int = 60, window: int = 60):
+        self.requests = requests
+        self.window = window
+        self.clients: Dict[str, list] = defaultdict(list)
+
+    def is_allowed(self, client_id: str) -> bool:
+        now = time.time()
+        window_start = now - self.window
+        self.clients[client_id] = [t for t in self.clients[client_id] if t > window_start]
+        if len(self.clients[client_id]) >= self.requests:
+            return False
+        self.clients[client_id].append(now)
+        return True
+
+
+rate_limiter = RateLimiter()
+
+
+# ==================== In-Memory Storage ====================
 models_db: Dict[str, Dict[str, Any]] = {}
 datasets_db: Dict[str, Dict[str, Any]] = {}
 
@@ -46,31 +122,59 @@ datasets_db: Dict[str, Dict[str, Any]] = {}
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: Dict[str, List[WebSocket]] = {}
     
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, session_id: str = ""):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        key = session_id or "default"
+        if key not in self.active_connections:
+            self.active_connections[key] = []
+        self.active_connections[key].append(websocket)
     
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    def disconnect(self, websocket: WebSocket, session_id: str = ""):
+        key = session_id or "default"
+        if key in self.active_connections:
+            if websocket in self.active_connections[key]:
+                self.active_connections[key].remove(websocket)
+            if not self.active_connections[key]:
+                del self.active_connections[key]
     
     async def send_message(self, message: Dict[str, Any], websocket: WebSocket):
-        await websocket.send_json(message)
+        try:
+            await websocket.send_json(message)
+        except Exception:
+            pass
     
-    async def broadcast(self, message: Dict[str, Any]):
-        for connection in self.active_connections:
-            await connection.send_json(message)
+    async def broadcast(self, message: Dict[str, Any], session_id: str = ""):
+        key = session_id or "default"
+        connections = self.active_connections.get(key, [])
+        disconnected = []
+        for connection in connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                disconnected.append(connection)
+        for conn in disconnected:
+            self.disconnect(conn, session_id)
 
 manager = ConnectionManager()
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+    subscribed_session = "default"
+    await manager.connect(websocket, subscribed_session)
     try:
         while True:
             data = await websocket.receive_text()
-            message = json.loads(data)
+            try:
+                message = json.loads(data)
+            except json.JSONDecodeError:
+                await manager.send_message({'type': 'error', 'message': 'Invalid JSON'}, websocket)
+                continue
+            
+            if not isinstance(message, dict):
+                await manager.send_message({'type': 'error', 'message': 'Invalid message format'}, websocket)
+                continue
             
             msg_type = message.get('type')
             
@@ -78,14 +182,20 @@ async def websocket_endpoint(websocket: WebSocket):
                 await manager.send_message({'type': 'pong'}, websocket)
             elif msg_type == 'subscribe':
                 session_id = message.get('session_id')
-                # Handle subscription to training session updates
+                if not isinstance(session_id, str) or not session_id.strip():
+                    await manager.send_message({'type': 'error', 'message': 'Invalid session_id'}, websocket)
+                    continue
+                # Reconnect to session-specific channel
+                manager.disconnect(websocket, subscribed_session)
+                subscribed_session = session_id
+                await manager.connect(websocket, subscribed_session)
                 await manager.send_message({
                     'type': 'subscribed',
-                    'session_id': session_id
+                    'session_id': subscribed_session
                 }, websocket)
                 
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, subscribed_session)
 
 # ==================== Health ====================
 
@@ -113,19 +223,19 @@ async def list_datasets():
     return list(datasets_db.values())
 
 @app.post("/api/v1/datasets")
-async def create_dataset(name: str, path: str, type: str):
+async def create_dataset(dataset: DatasetCreate):
     dataset_id = str(uuid.uuid4())
-    dataset = {
+    ds = {
         'id': dataset_id,
-        'name': name,
-        'path': path,
-        'type': type,
+        'name': dataset.name,
+        'path': dataset.path,
+        'type': dataset.type,
         'status': 'ready',
         'file_count': 0,
         'created_at': datetime.now().isoformat()
     }
-    datasets_db[dataset_id] = dataset
-    return dataset
+    datasets_db[dataset_id] = ds
+    return ds
 
 @app.get("/api/v1/datasets/{dataset_id}")
 async def get_dataset(dataset_id: str):
@@ -147,26 +257,20 @@ async def list_models():
     return list(models_db.values())
 
 @app.post("/api/v1/models")
-async def create_model(
-    name: str,
-    type: str,
-    base_model: Optional[str] = None,
-    dataset_id: Optional[str] = None,
-    params: Optional[Dict[str, Any]] = None
-):
+async def create_model(model: ModelCreate):
     model_id = str(uuid.uuid4())
-    model = {
+    m = {
         'id': model_id,
-        'name': name,
-        'type': type,
-        'base_model': base_model,
+        'name': model.name,
+        'type': model.type,
+        'base_model': model.base_model,
         'status': 'pending',
-        'dataset_id': dataset_id,
-        'params': params or {},
+        'dataset_id': model.dataset_id,
+        'params': model.params or {},
         'created_at': datetime.now().isoformat()
     }
-    models_db[model_id] = model
-    return model
+    models_db[model_id] = m
+    return m
 
 @app.get("/api/v1/models/{model_id}")
 async def get_model(model_id: str):
@@ -274,7 +378,7 @@ async def run_real_training(session: Dict[str, Any], model: Dict[str, Any]):
         await manager.broadcast({
             'type': 'training_update',
             'data': log_data
-        })
+        }, session_id=sid)
     
     # Run actual training
     result = await training_manager.run_training(
@@ -306,32 +410,30 @@ async def run_real_training(session: Dict[str, Any], model: Dict[str, Any]):
             'session_id': session_id,
             'model': model
         }
-    })
+    }, session_id=session_id)
 
 @app.post("/api/v1/training/pause")
 async def pause_training():
-    # Find active training session
     for session in training_manager.active_sessions.values():
         if session.get('status') == 'training':
             session['status'] = 'paused'
             await manager.broadcast({
                 'type': 'training_paused',
                 'session_id': session['id']
-            })
+            }, session_id=session['id'])
             return {"message": "Training paused", "session_id": session['id']}
     
     raise HTTPException(status_code=404, detail="No active training session")
 
 @app.post("/api/v1/training/resume")
 async def resume_training():
-    # Find paused training session
     for session in training_manager.active_sessions.values():
         if session.get('status') == 'paused':
             session['status'] = 'training'
             await manager.broadcast({
                 'type': 'training_resumed',
                 'session_id': session['id']
-            })
+            }, session_id=session['id'])
             return {"message": "Training resumed", "session_id": session['id']}
     
     raise HTTPException(status_code=404, detail="No paused training session")
@@ -344,7 +446,7 @@ async def stop_training():
             await manager.broadcast({
                 'type': 'training_stopped',
                 'session_id': session['id']
-            })
+            }, session_id=session['id'])
             return {"message": "Training stopped", "session_id": session['id']}
     
     raise HTTPException(status_code=404, detail="No active training session")
@@ -359,7 +461,7 @@ async def get_training_session(session_id: str):
 # ==================== Inference ====================
 
 @app.post("/api/v1/inference/predict")
-async def predict(model_id: str, input_data: Dict[str, Any]):
+async def predict(model_id: str, input_data: PredictInput):
     if model_id not in models_db:
         raise HTTPException(status_code=404, detail="Model not found")
     
@@ -369,9 +471,8 @@ async def predict(model_id: str, input_data: Dict[str, Any]):
     
     result = {"class": "unknown", "confidence": 0.95}
     
-    # Keyword-based sentiment analysis
-    if 'text' in input_data:
-        text = input_data['text']
+    if input_data.text:
+        text = input_data.text
         positive_words = ['good', 'great', 'excellent', 'amazing', 'love', 'best', 'wonderful']
         negative_words = ['bad', 'terrible', 'awful', 'hate', 'worst', 'poor', 'horrible']
         
@@ -386,10 +487,10 @@ async def predict(model_id: str, input_data: Dict[str, Any]):
         else:
             result = {"class": "neutral", "confidence": 0.6}
     
-    elif 'image_path' in input_data:
+    elif input_data.image_path:
         classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
         result = {
-            "class": classes[hash(input_data['image_path']) % 10],
+            "class": classes[hash(input_data.image_path) % 10],
             "confidence": 0.85
         }
     

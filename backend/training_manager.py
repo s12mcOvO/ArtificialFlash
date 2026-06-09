@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from pathlib import Path
@@ -8,6 +9,15 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+
+UUID_PATTERN = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+MODELS_DIR = Path("models")
+
+
+def _safe_session_id(session_id: str) -> str:
+    if not UUID_PATTERN.match(session_id):
+        raise ValueError(f"Invalid session ID format: {session_id}")
+    return session_id
 
 try:
     from models import (
@@ -164,8 +174,9 @@ class TrainingManager:
             # Save model
             if session_id in self.pytorch_models:
                 trained_model = self.pytorch_models[session_id]
-                model_path = Path(f"models/{session_id}.pt")
-                model_path.parent.mkdir(parents=True, exist_ok=True)
+                _safe_session_id(session_id)
+                MODELS_DIR.mkdir(parents=True, exist_ok=True)
+                model_path = MODELS_DIR / f"{session_id}.pt"
                 torch.save(trained_model.state_dict(), model_path)
                 
                 self.update_session(session_id, {
@@ -186,18 +197,18 @@ class TrainingManager:
             return {"error": str(e)}
     
     def export_model(self, session_id: str, format: str = 'onnx') -> Optional[str]:
-        """Export trained model to specified format."""
-        
         if session_id not in self.pytorch_models:
             return None
         
+        _safe_session_id(session_id)
         model = self.pytorch_models[session_id]
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
         
         if format == 'onnx':
             try:
                 import torch.onnx
                 dummy_input = torch.randn(1, 1, 28, 28)
-                output_path = f"models/{session_id}.onnx"
+                output_path = str(MODELS_DIR / f"{session_id}.onnx")
                 torch.onnx.export(
                     model, 
                     dummy_input, 
@@ -212,7 +223,7 @@ class TrainingManager:
                 return None
         
         elif format == 'torch':
-            output_path = f"models/{session_id}.pt"
+            output_path = str(MODELS_DIR / f"{session_id}.pt")
             torch.save(model.state_dict(), output_path)
             return output_path
         

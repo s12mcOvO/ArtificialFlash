@@ -82,9 +82,9 @@ class _DataPageState extends ConsumerState<DataPage>
     _showDownloadDialog(context, name);
   }
 
-  void downloadFromUrl(String name) {
-    ref.read(downloadProgressProvider.notifier).downloadDataset(name);
-    _showDownloadDialog(context, name);
+  void downloadFromUrl(String url) {
+    ref.read(downloadProgressProvider.notifier).downloadDataset(url);
+    _showDownloadDialog(context, 'URL Download');
   }
 
   void _showDownloadDialog(BuildContext context, String name) {
@@ -603,15 +603,40 @@ class _UrlDownloadTabState extends State<_UrlDownloadTab> {
   }
 
   void _startDownload() {
-    if (_urlController.text.isEmpty || _nameController.text.isEmpty) {
+    final url = _urlController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (url.isEmpty || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
 
-    final name = _nameController.text.trim();
-    context.findAncestorStateOfType<_DataPageState>()?.downloadFromUrl(name);
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid URL')),
+      );
+      return;
+    }
+
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Only http and https URLs are supported')),
+      );
+      return;
+    }
+
+    if (name.length > 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dataset name is too long')),
+      );
+      return;
+    }
+
+    context.findAncestorStateOfType<_DataPageState>()
+        ?.downloadFromUrl(url);
   }
 }
 

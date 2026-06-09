@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,31 +8,59 @@ import 'package:artificial_flash/presentation/pages/main_shell.dart';
 import 'package:artificial_flash/presentation/providers/settings_provider.dart';
 import 'package:artificial_flash/l10n/app_localizations.dart';
 
-Future<void> _launchBackend() async {
+Future<Process?> _launchBackend() async {
   try {
     final execDir = Directory.current;
     final beDir = Directory('${execDir.path}/backend');
 
     if (!await beDir.exists()) {
-      return;
+      return null;
     }
 
-    Process.start(
-      Platform.isWindows ? 'python' : 'python3',
+    final pythonPath = Platform.isWindows ? 'python' : 'python3';
+    final pythonCheck = await Process.run(
+      pythonPath,
+      ['-c', 'import sys; print(sys.executable)'],
+      workingDirectory: beDir.path,
+    );
+
+    if (pythonCheck.exitCode != 0) {
+      return null;
+    }
+
+    final pythonExecutable = pythonCheck.stdout.toString().trim();
+
+    final process = await Process.start(
+      pythonExecutable,
       ['main.py'],
       workingDirectory: beDir.path,
-      runInShell: true,
+      runInShell: false,
     );
+
+    process.stdout
+        .transform(utf8.decoder)
+        .listen((data) => debugPrint('[backend] $data'));
+    process.stderr
+        .transform(utf8.decoder)
+        .listen((data) => debugPrint('[backend:error] $data'));
+
+    process.exitCode.then((code) {
+      debugPrint('[backend] exited with code $code');
+    });
+
+    return process;
   } catch (_) {
-    // Silently fail if backend can't be started
+    return null;
   }
 }
+
+Process? _backendProcess;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-    _launchBackend();
+    _backendProcess = await _launchBackend();
   }
 
   runApp(const ProviderScope(child: ArtificialFlashApp()));
