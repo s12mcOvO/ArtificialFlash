@@ -1,0 +1,18 @@
+namespace ArtificialFlash
+{
+    [default_interface]
+    runtimeclass BoolToVisibilityConverter : Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        BoolToVisibilityConverter();
+        Object Convert(Object value, Windows.UI.Xaml.Interop.TypeName targetType, Object parameter, String language);
+        Object ConvertBack(Object value, Windows.UI.Xaml.Interop.TypeName targetType, Object parameter, String language);
+    }
+
+    [default_interface]
+    runtimeclass InverseBoolConverter : Microsoft.UI.Xaml.Data.IValueConverter
+    {
+        InverseBoolConverter();
+        Object Convert(Object value, Windows.UI.Xaml.Interop.TypeName targetType, Object parameter, String language);
+        Object ConvertBack(Object value, Windows.UI.Xaml.Interop.TypeName targetType, Object parameter, String language);
+    }
+}

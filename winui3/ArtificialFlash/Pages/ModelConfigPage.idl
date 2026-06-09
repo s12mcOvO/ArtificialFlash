@@ -1,0 +1,8 @@
+namespace ArtificialFlash
+{
+    [default_interface]
+    runtimeclass ModelConfigPage : Microsoft.UI.Xaml.Controls.Page
+    {
+        ModelConfigPage();
+    }
+}

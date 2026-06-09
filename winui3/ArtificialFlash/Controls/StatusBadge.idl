@@ -1,0 +1,10 @@
+namespace ArtificialFlash
+{
+    [default_interface]
+    runtimeclass StatusBadge : Microsoft.UI.Xaml.Controls.Control
+    {
+        StatusBadge();
+        static Microsoft.UI.Xaml.DependencyProperty StatusProperty{ get; };
+        String Status;
+    }
+}

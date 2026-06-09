@@ -1,0 +1,100 @@
+<Page
+    x:Class="ArtificialFlash.TrainingPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Training" 
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   FontSize="24" FontWeight="Bold"
+                   Padding="32,16,32,0"/>
+
+        <StackPanel Grid.Row="1" Padding="32,16" Spacing="12">
+            <ComboBox x:Name="ModelSelector" Header="Select Model"
+                      PlaceholderText="Choose a model to train"
+                      Width="400" HorizontalAlignment="Left"/>
+
+            <ComboBox x:Name="ModeSelector" Header="Training Mode"
+                      SelectedIndex="0" Width="200" HorizontalAlignment="Left">
+                <ComboBoxItem Content="Local Simulation"/>
+                <ComboBoxItem Content="Remote Server"/>
+            </ComboBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Padding="32,8" Spacing="8">
+            <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+            <ProgressBar x:Name="TrainingProgress"
+                         Value="{x:Bind ViewModel.Progress, Mode=OneWay}"
+                         Maximum="1.0"
+                         ShowPaused="False"
+                         Width="400" HorizontalAlignment="Left"/>
+
+            <Grid Width="400" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock>
+                    <Run Text="Loss: "/>
+                    <Run Text="{x:Bind ViewModel.CurrentLoss, Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock Grid.Column="1">
+                    <Run Text="Accuracy: "/>
+                    <Run Text="{x:Bind ViewModel.CurrentAccuracy, Mode=OneWay}"/>
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                    Padding="32,8" Spacing="12">
+            <Button x:Name="StartBtn" 
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="OnStartTraining">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE768;"/>
+                    <TextBlock Text="Start"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="PauseBtn" Click="OnPauseTraining">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE769;"/>
+                    <TextBlock Text="Pause"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="ResumeBtn" Click="OnResumeTraining">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE768;"/>
+                    <TextBlock Text="Resume"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="StopBtn" Click="OnStopTraining">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE71A;"/>
+                    <TextBlock Text="Stop"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="4" Padding="32,8">
+            <ItemsControl x:Name="TrainingLogs">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                                   FontFamily="Consolas" FontSize="12"
+                                   Margin="0,2"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Page>

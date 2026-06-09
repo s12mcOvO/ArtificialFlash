@@ -1,0 +1,111 @@
+<Page
+    x:Class="ArtificialFlash.DataPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Data Management" 
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   FontSize="24" FontWeight="Bold"
+                   Padding="32,16,32,0"/>
+
+        <TabView x:Name="DataTabs" Grid.Row="1"
+                 TabWidthMode="SizeToContent"
+                 Padding="32,8,32,0">
+            <TabViewItem Header="Local Files">
+                <ScrollViewer>
+                    <StackPanel Padding="0,16,0,0">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Datasets, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="12">
+                                        <TextBlock Text="{Binding}" 
+                                                   Style="{StaticResource BodyTextBlockStyle}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="No datasets yet. Upload files or download built-in datasets."
+                                   Visibility="Collapsed" Opacity="0.5"
+                                   Margin="0,24,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabViewItem>
+
+            <TabViewItem Header="URL Download">
+                <StackPanel Padding="24" Spacing="16">
+                    <TextBox x:Name="UrlTextBox" 
+                             Header="Download URL"
+                             PlaceholderText="Enter dataset URL"/>
+                    <TextBox x:Name="NameTextBox"
+                             Header="Dataset Name"
+                             PlaceholderText="Enter a name"/>
+                    <Button x:Name="DownloadBtn" 
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="OnDownloadFromUrl">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE896;"/>
+                            <TextBlock Text="Download"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </TabViewItem>
+
+            <TabViewItem Header="Built-in">
+                <GridView x:Name="BuiltInGrid" Padding="16"
+                          SelectionMode="None">
+                    <Grid Width="280">
+                        <StackPanel Spacing="8" Padding="16">
+                            <TextBlock Text="MNIST" FontWeight="Bold"/>
+                            <TextBlock Text="Handwritten digit images" 
+                                       TextWrapping="Wrap" Opacity="0.7"/>
+                            <TextBlock Text="Size: ~50MB" FontSize="12"/>
+                            <Button Content="Download" Tag="MNIST"
+                                    Click="OnDownloadBuiltIn"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Width="280">
+                        <StackPanel Spacing="8" Padding="16">
+                            <TextBlock Text="CIFAR-10" FontWeight="Bold"/>
+                            <TextBlock Text="10-class image dataset"
+                                       TextWrapping="Wrap" Opacity="0.7"/>
+                            <TextBlock Text="Size: ~170MB" FontSize="12"/>
+                            <Button Content="Download" Tag="CIFAR-10"
+                                    Click="OnDownloadBuiltIn"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Width="280">
+                        <StackPanel Spacing="8" Padding="16">
+                            <TextBlock Text="Fashion-MNIST" FontWeight="Bold"/>
+                            <TextBlock Text="10-class fashion products"
+                                       TextWrapping="Wrap" Opacity="0.7"/>
+                            <TextBlock Text="Size: ~30MB" FontSize="12"/>
+                            <Button Content="Download" Tag="Fashion-MNIST"
+                                    Click="OnDownloadBuiltIn"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Width="280">
+                        <StackPanel Spacing="8" Padding="16">
+                            <TextBlock Text="IMDB Reviews" FontWeight="Bold"/>
+                            <TextBlock Text="Movie review sentiment"
+                                       TextWrapping="Wrap" Opacity="0.7"/>
+                            <TextBlock Text="Size: ~80MB" FontSize="12"/>
+                            <Button Content="Download" Tag="IMDB Reviews"
+                                    Click="OnDownloadBuiltIn"/>
+                        </StackPanel>
+                    </Grid>
+                </GridView>
+            </TabViewItem>
+        </TabView>
+
+        <CommandBar Grid.Row="2" VerticalAlignment="Bottom">
+            <AppBarButton Icon="Add" Label="Add Dataset" Click="OnAddDataset"/>
+        </CommandBar>
+    </Grid>
+</Page>

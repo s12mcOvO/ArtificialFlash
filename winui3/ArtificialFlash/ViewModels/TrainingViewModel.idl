@@ -1,0 +1,17 @@
+namespace ArtificialFlash
+{
+    [default_interface]
+    runtimeclass TrainingViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        TrainingViewModel();
+        Double Progress;
+        Double CurrentLoss;
+        Double CurrentAccuracy;
+        String StatusText;
+        void StartTraining(String modelId);
+        void PauseTraining();
+        void ResumeTraining();
+        void StopTraining();
+        void Refresh();
+    }
+}

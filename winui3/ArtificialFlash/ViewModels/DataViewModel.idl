@@ -1,0 +1,12 @@
+namespace ArtificialFlash
+{
+    [default_interface]
+    runtimeclass DataViewModel : Microsoft.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        DataViewModel();
+        Windows.Foundation.Collections.IVector<IInspectable> Datasets { get; };
+        void Refresh();
+        void AddDataset(String name, String path, String type);
+        void DeleteDataset(String id);
+    }
+}

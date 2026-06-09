@@ -1,0 +1,25 @@
+# Windows Build Artifacts
+x64/
+x86/
+ARM64/
+Debug/
+Release/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.vcxproj.filters
+*.vcxproj.user
+*.db
+*.db-shm
+*.db-wal
+
+# NuGet
+packages/
+*.nupkg
+
+# VS
+.vs/
+*.log
+ipch/
+*.tlog

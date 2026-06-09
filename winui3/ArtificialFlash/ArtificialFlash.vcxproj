@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
+  <PropertyGroup Label="Globals">
+    <CppWinRTOptimized>true</CppWinRTOptimized>
+    <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
+    <MinimalCoreWin>true</MinimalCoreWin>
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <ProjectName>ArtificialFlash</ProjectName>
+    <RootNamespace>ArtificialFlash</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.17763.0</WindowsTargetPlatformMinVersion>
+    <EnableMsixTooling>true</EnableMsixTooling>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>windowsapp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>windowsapp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="MainWindow.h" />
+    <ClInclude Include="Pages\HomePage.h" />
+    <ClInclude Include="Pages\DataPage.h" />
+    <ClInclude Include="Pages\ModelsPage.h" />
+    <ClInclude Include="Pages\ModelConfigPage.h" />
+    <ClInclude Include="Pages\TrainingPage.h" />
+    <ClInclude Include="Pages\SettingsPage.h" />
+    <ClInclude Include="Models\Dataset.h" />
+    <ClInclude Include="Models\Model.h" />
+    <ClInclude Include="Models\TrainingSession.h" />
+    <ClInclude Include="Services\SettingsService.h" />
+    <ClInclude Include="Backend\NeuralNetworks.h" />
+    <ClInclude Include="Backend\TrainingManager.h" />
+    <ClInclude Include="Backend\BackendService.h" />
+    <ClInclude Include="Controls\StatusBadge.h" />
+    <ClInclude Include="Controls\TrainingChart.h" />
+    <ClInclude Include="ViewModels\HomeViewModel.h" />
+    <ClInclude Include="ViewModels\DataViewModel.h" />
+    <ClInclude Include="ViewModels\ModelsViewModel.h" />
+    <ClInclude Include="ViewModels\TrainingViewModel.h" />
+    <ClInclude Include="Converters\ValueConverters.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="Pages\HomePage.cpp" />
+    <ClCompile Include="Pages\DataPage.cpp" />
+    <ClCompile Include="Pages\ModelsPage.cpp" />
+    <ClCompile Include="Pages\ModelConfigPage.cpp" />
+    <ClCompile Include="Pages\TrainingPage.cpp" />
+    <ClCompile Include="Pages\SettingsPage.cpp" />
+    <ClCompile Include="Services\SettingsService.cpp" />
+    <ClCompile Include="Backend\NeuralNetworks.cpp" />
+    <ClCompile Include="Backend\TrainingManager.cpp" />
+    <ClCompile Include="Backend\BackendService.cpp" />
+    <ClCompile Include="Controls\TrainingChart.cpp" />
+    <ClCompile Include="ViewModels\HomeViewModel.cpp" />
+    <ClCompile Include="ViewModels\DataViewModel.cpp" />
+    <ClCompile Include="ViewModels\ModelsViewModel.cpp" />
+    <ClCompile Include="ViewModels\TrainingViewModel.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="App.idl" />
+    <Midl Include="MainWindow.idl" />
+    <Midl Include="Pages\HomePage.idl" />
+    <Midl Include="Pages\DataPage.idl" />
+    <Midl Include="Pages\ModelsPage.idl" />
+    <Midl Include="Pages\ModelConfigPage.idl" />
+    <Midl Include="Pages\TrainingPage.idl" />
+    <Midl Include="Pages\SettingsPage.idl" />
+    <Midl Include="Controls\StatusBadge.idl" />
+    <Midl Include="Controls\TrainingChart.idl" />
+    <Midl Include="ViewModels\HomeViewModel.idl" />
+    <Midl Include="ViewModels\DataViewModel.idl" />
+    <Midl Include="ViewModels\ModelsViewModel.idl" />
+    <Midl Include="ViewModels\TrainingViewModel.idl" />
+    <Midl Include="Converters\ValueConverters.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xaml Include="App.xaml" />
+    <Xaml Include="MainWindow.xaml" />
+    <Xaml Include="Pages\HomePage.xaml" />
+    <Xaml Include="Pages\DataPage.xaml" />
+    <Xaml Include="Pages\ModelsPage.xaml" />
+    <Xaml Include="Pages\ModelConfigPage.xaml" />
+    <Xaml Include="Pages\TrainingPage.xaml" />
+    <Xaml Include="Pages\SettingsPage.xaml" />
+    <Xaml Include="Controls\StatusBadge.xaml" />
+    <Xaml Include="Controls\TrainingChart.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
