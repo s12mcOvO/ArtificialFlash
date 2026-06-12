@@ -5,6 +5,11 @@ using ::ArtificialFlash::Backend::BackendService;
 
 namespace ArtificialFlash
 {
+    ModelsViewModel::ModelsViewModel()
+    {
+        Refresh();
+    }
+
     void ModelsViewModel::Refresh()
     {
         auto& backend = BackendService::Instance();
