@@ -45,7 +45,7 @@
                 <NumberBox x:Name="LearningRateBox" Grid.Row="0" Grid.Column="0"
                            Header="Learning Rate" Value="0.001" 
                            SmallChange="0.001" LargeChange="0.01"
-                           NumberFormatter="{}{0:0.000}" Margin="0,0,8,0"/>
+                           Margin="0,0,8,0"/>
 
                 <NumberBox x:Name="EpochsBox" Grid.Row="0" Grid.Column="1"
                            Header="Epochs" Value="10"
