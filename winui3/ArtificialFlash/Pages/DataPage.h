@@ -1,13 +1,13 @@
 #pragma once
-#include "DataPage.g.h"
+#include <memory>
 #include "../ViewModels/DataViewModel.h"
+#include "DataPage.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
     struct DataPage : DataPageT<DataPage>
     {
         DataPage();
-        ArtificialFlash::DataViewModel ViewModel() { return m_viewModel; }
 
         void OnAddDataset(Windows::Foundation::IInspectable const&,
             Microsoft::UI::Xaml::RoutedEventArgs const&);
@@ -17,7 +17,7 @@ namespace winrt::ArtificialFlash::implementation
             Microsoft::UI::Xaml::RoutedEventArgs const&);
 
     private:
-        ArtificialFlash::DataViewModel m_viewModel;
+        std::shared_ptr<::ArtificialFlash::DataViewModel> m_viewModel;
     };
 }
 

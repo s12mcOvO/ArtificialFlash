@@ -10,11 +10,14 @@ using namespace winrt;
 using namespace winrt::Microsoft::UI::Xaml;
 using namespace winrt::Microsoft::UI::Xaml::Controls;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    MainWindow::MainWindow()
+    MainWindowImpl::MainWindowImpl()
     {
-        Title(L"ArtificialFlash");
+        m_window = Microsoft::UI::Xaml::Window();
+        m_window.Title(L"ArtificialFlash");
+
+        m_contentFrame = Frame();
 
         auto homeItem = NavigationViewItem();
         homeItem.Content(box_value(L"Home"));
@@ -47,15 +50,21 @@ namespace winrt::ArtificialFlash::implementation
         m_navView.MenuItems().Append(modelsItem);
         m_navView.MenuItems().Append(trainingItem);
         m_navView.MenuItems().Append(settingsItem);
+        m_navView.Content(m_contentFrame);
         m_navView.IsBackButtonVisible(NavigationViewBackButtonVisible::Collapsed);
-        m_navView.SelectionChanged({ this, &MainWindow::OnNavigationChanged });
+        m_navView.SelectionChanged({ this, &MainWindowImpl::OnNavigationChanged });
         m_navView.SelectedItem(homeItem);
 
-        Content(m_navView);
+        m_window.Content(m_navView);
         NavigateToPage(L"home");
     }
 
-    void MainWindow::OnNavigationChanged(
+    void MainWindowImpl::Activate()
+    {
+        m_window.Activate();
+    }
+
+    void MainWindowImpl::OnNavigationChanged(
         NavigationView const&,
         NavigationViewSelectionChangedEventArgs const& args)
     {
@@ -67,21 +76,21 @@ namespace winrt::ArtificialFlash::implementation
         }
     }
 
-    void MainWindow::NavigateToPage(winrt::hstring const& tag)
+    void MainWindowImpl::NavigateToPage(winrt::hstring const& tag)
     {
         Windows::Foundation::IInspectable page;
         if (tag == L"home")
-            page = make<ArtificialFlash::implementation::HomePage>();
+            page = make<winrt::ArtificialFlash::implementation::HomePage>();
         else if (tag == L"data")
-            page = make<ArtificialFlash::implementation::DataPage>();
+            page = make<winrt::ArtificialFlash::implementation::DataPage>();
         else if (tag == L"models")
-            page = make<ArtificialFlash::implementation::ModelsPage>();
+            page = make<winrt::ArtificialFlash::implementation::ModelsPage>();
         else if (tag == L"training")
-            page = make<ArtificialFlash::implementation::TrainingPage>();
+            page = make<winrt::ArtificialFlash::implementation::TrainingPage>();
         else if (tag == L"settings")
-            page = make<ArtificialFlash::implementation::SettingsPage>();
+            page = make<winrt::ArtificialFlash::implementation::SettingsPage>();
         else
-            page = make<ArtificialFlash::implementation::HomePage>();
+            page = make<winrt::ArtificialFlash::implementation::HomePage>();
         m_navView.Content(page);
     }
 }

@@ -1,19 +1,26 @@
 #pragma once
-#include "HomeViewModel.g.h"
+#include <string>
+#include <vector>
+#include <functional>
+#include <winrt/Microsoft.UI.Xaml.Data.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include "../Backend/BackendService.h"
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct HomeViewModel : HomeViewModelT<HomeViewModel>
+    class HomeViewModel
     {
-        HomeViewModel() = default;
+    public:
+        HomeViewModel();
+        ~HomeViewModel() = default;
 
-        int32_t DatasetCount();
+        int32_t DatasetCount() const { return m_datasetCount; }
         void DatasetCount(int32_t value);
-        int32_t ModelCount();
+        int32_t ModelCount() const { return m_modelCount; }
         void ModelCount(int32_t value);
-        bool IsTrainingActive();
+        bool IsTrainingActive() const { return m_isTrainingActive; }
         void IsTrainingActive(bool value);
-        winrt::hstring BackendStatus();
+        winrt::hstring BackendStatus() const { return m_backendStatus; }
         void BackendStatus(winrt::hstring const& value);
 
         void Refresh();
@@ -31,9 +38,4 @@ namespace winrt::ArtificialFlash::implementation
 
         void RaisePropertyChanged(winrt::hstring const& name);
     };
-}
-
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct HomeViewModel : HomeViewModelT<HomeViewModel, implementation::HomeViewModel> {};
 }

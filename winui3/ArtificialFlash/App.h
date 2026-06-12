@@ -1,24 +1,21 @@
 #pragma once
-#include "App.g.h"
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#include <winrt/Windows.Foundation.h>
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct App : AppT<App>
+    struct App
     {
         App();
-        ~App();
+        ~App() = default;
 
         void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
-
-    private:
         void InitializeBackend();
         void ShutdownBackend();
-        winrt::Microsoft::UI::Xaml::Window m_window{ nullptr };
-    };
-}
 
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct App : AppT<App, implementation::App> {};
+    private:
+        struct MainWindowImpl;
+        std::unique_ptr<MainWindowImpl> m_impl;
+    };
 }

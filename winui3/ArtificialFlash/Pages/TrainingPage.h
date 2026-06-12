@@ -1,13 +1,13 @@
 #pragma once
-#include "TrainingPage.g.h"
+#include <memory>
 #include "../ViewModels/TrainingViewModel.h"
+#include "TrainingPage.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
     struct TrainingPage : TrainingPageT<TrainingPage>
     {
         TrainingPage();
-        ArtificialFlash::TrainingViewModel ViewModel() { return m_viewModel; }
 
         void OnStartTraining(Windows::Foundation::IInspectable const&,
             Microsoft::UI::Xaml::RoutedEventArgs const&);
@@ -19,9 +19,7 @@ namespace winrt::ArtificialFlash::implementation
             Microsoft::UI::Xaml::RoutedEventArgs const&);
 
     private:
-        ArtificialFlash::TrainingViewModel m_viewModel;
-        Windows::Foundation::Collections::IVector<winrt::hstring>
-            m_logs = winrt::single_threaded_observable_vector<winrt::hstring>();
+        std::shared_ptr<::ArtificialFlash::TrainingViewModel> m_viewModel;
     };
 }
 

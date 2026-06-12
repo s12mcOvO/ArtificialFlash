@@ -1,10 +1,9 @@
 #include "pch.h"
 #include "TrainingViewModel.h"
-#include "../Backend/BackendService.h"
 
 using ::ArtificialFlash::Backend::BackendService;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
     TrainingViewModel::TrainingViewModel()
     {
@@ -21,25 +20,21 @@ namespace winrt::ArtificialFlash::implementation
         });
     }
 
-    double TrainingViewModel::Progress() { return m_progress; }
     void TrainingViewModel::Progress(double value)
     {
         if (m_progress != value) { m_progress = value; RaisePropertyChanged(L"Progress"); }
     }
 
-    double TrainingViewModel::CurrentLoss() { return m_currentLoss; }
     void TrainingViewModel::CurrentLoss(double value)
     {
         if (m_currentLoss != value) { m_currentLoss = value; RaisePropertyChanged(L"CurrentLoss"); }
     }
 
-    double TrainingViewModel::CurrentAccuracy() { return m_currentAccuracy; }
     void TrainingViewModel::CurrentAccuracy(double value)
     {
         if (m_currentAccuracy != value) { m_currentAccuracy = value; RaisePropertyChanged(L"CurrentAccuracy"); }
     }
 
-    winrt::hstring TrainingViewModel::StatusText() { return m_statusText; }
     void TrainingViewModel::StatusText(winrt::hstring const& value)
     {
         if (m_statusText != value) { m_statusText = value; RaisePropertyChanged(L"StatusText"); }

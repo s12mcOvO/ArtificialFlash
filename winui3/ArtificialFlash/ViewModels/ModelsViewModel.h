@@ -1,13 +1,17 @@
 #pragma once
-#include "ModelsViewModel.g.h"
+#include <winrt/Microsoft.UI.Xaml.Data.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include "../Backend/BackendService.h"
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct ModelsViewModel : ModelsViewModelT<ModelsViewModel>
+    class ModelsViewModel
     {
-        ModelsViewModel() = default;
+    public:
+        ModelsViewModel();
+        ~ModelsViewModel() = default;
 
-        Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> Models();
+        Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> Models() const { return m_models; }
         void Refresh();
         void CreateModel(winrt::hstring const& name, winrt::hstring const& type);
         void DeleteModel(winrt::hstring const& id);
@@ -23,9 +27,4 @@ namespace winrt::ArtificialFlash::implementation
 
         void RaisePropertyChanged(winrt::hstring const& name);
     };
-}
-
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct ModelsViewModel : ModelsViewModelT<ModelsViewModel, implementation::ModelsViewModel> {};
 }

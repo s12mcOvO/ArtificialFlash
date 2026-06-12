@@ -1,15 +1,13 @@
 #include "pch.h"
 #include "DataViewModel.h"
-#include "../Backend/BackendService.h"
 
 using ::ArtificialFlash::Backend::BackendService;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable>
-        DataViewModel::Datasets()
+    DataViewModel::DataViewModel()
     {
-        return m_datasets;
+        Refresh();
     }
 
     void DataViewModel::Refresh()

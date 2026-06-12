@@ -1,17 +1,10 @@
 #include "pch.h"
 #include "ModelsViewModel.h"
-#include "../Backend/BackendService.h"
 
 using ::ArtificialFlash::Backend::BackendService;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable>
-        ModelsViewModel::Models()
-    {
-        return m_models;
-    }
-
     void ModelsViewModel::Refresh()
     {
         m_models.Clear();

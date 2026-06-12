@@ -1,13 +1,13 @@
 #pragma once
-#include "ModelsPage.g.h"
+#include <memory>
 #include "../ViewModels/ModelsViewModel.h"
+#include "ModelsPage.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
     struct ModelsPage : ModelsPageT<ModelsPage>
     {
         ModelsPage();
-        ArtificialFlash::ModelsViewModel ViewModel() { return m_viewModel; }
 
         void OnNewModel(Windows::Foundation::IInspectable const&,
             Microsoft::UI::Xaml::RoutedEventArgs const&);
@@ -15,7 +15,7 @@ namespace winrt::ArtificialFlash::implementation
             Microsoft::UI::Xaml::Controls::ItemClickEventArgs const&);
 
     private:
-        ArtificialFlash::ModelsViewModel m_viewModel;
+        std::shared_ptr<::ArtificialFlash::ModelsViewModel> m_viewModel;
     };
 }
 

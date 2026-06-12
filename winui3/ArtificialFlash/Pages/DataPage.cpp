@@ -9,9 +9,7 @@ namespace winrt::ArtificialFlash::implementation
 {
     DataPage::DataPage()
     {
-        auto vmImpl = winrt::make_self<ArtificialFlash::implementation::DataViewModel>();
-        vmImpl->Refresh();
-        m_viewModel = vmImpl.as<ArtificialFlash::DataViewModel>();
+        m_viewModel = std::make_shared<::ArtificialFlash::DataViewModel>();
 
         auto stack = StackPanel();
         stack.Margin(Thickness{ 16, 16, 16, 16 });

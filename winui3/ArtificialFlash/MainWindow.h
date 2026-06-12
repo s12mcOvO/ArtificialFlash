@@ -1,26 +1,26 @@
 #pragma once
-#include "MainWindow.g.h"
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
-#include <winrt/Microsoft.UI.Xaml.Navigation.h>
+#include <winrt/Windows.Foundation.h>
+#include <memory>
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct MainWindow : MainWindowT<MainWindow>
+    class MainWindowImpl
     {
-        MainWindow();
-
-        void OnNavigationChanged(
-            Microsoft::UI::Xaml::Controls::NavigationView const&,
-            Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs const&);
+    public:
+        MainWindowImpl();
+        ~MainWindowImpl() = default;
+        void Activate();
 
     private:
-        Microsoft::UI::Xaml::Controls::NavigationView m_navView{ nullptr };
+        void OnNavigationChanged(
+            winrt::Microsoft::UI::Xaml::Controls::NavigationView const&,
+            winrt::Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs const&);
         void NavigateToPage(winrt::hstring const& tag);
-    };
-}
 
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct MainWindow : MainWindowT<MainWindow, implementation::MainWindow> {};
+        winrt::Microsoft::UI::Xaml::Controls::NavigationView m_navView{ nullptr };
+        winrt::Microsoft::UI::Xaml::Controls::Frame m_contentFrame{ nullptr };
+        winrt::Microsoft::UI::Xaml::Window m_window{ nullptr };
+    };
 }

@@ -5,22 +5,16 @@
 
 using ::ArtificialFlash::Backend::BackendService;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
     App::App()
     {
-        InitializeBackend();
-    }
-
-    App::~App()
-    {
-        ShutdownBackend();
+        m_impl = std::make_unique<MainWindowImpl>();
     }
 
     void App::OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&)
     {
-        m_window = make<MainWindow>();
-        m_window.Activate();
+        m_impl->Activate();
     }
 
     void App::InitializeBackend()

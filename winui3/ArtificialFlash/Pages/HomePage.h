@@ -1,13 +1,13 @@
 #pragma once
-#include "HomePage.g.h"
+#include <memory>
 #include "../ViewModels/HomeViewModel.h"
+#include "HomePage.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
     struct HomePage : HomePageT<HomePage>
     {
         HomePage();
-        ArtificialFlash::HomeViewModel ViewModel() { return m_viewModel; }
 
         void OnNewDataset(Windows::Foundation::IInspectable const&,
             Microsoft::UI::Xaml::RoutedEventArgs const&);
@@ -17,7 +17,7 @@ namespace winrt::ArtificialFlash::implementation
             Microsoft::UI::Xaml::RoutedEventArgs const&);
 
     private:
-        ArtificialFlash::HomeViewModel m_viewModel;
+        std::shared_ptr<::ArtificialFlash::HomeViewModel> m_viewModel;
     };
 }
 

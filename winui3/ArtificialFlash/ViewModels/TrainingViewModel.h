@@ -1,19 +1,23 @@
 #pragma once
-#include "TrainingViewModel.g.h"
+#include <string>
+#include <winrt/Microsoft.UI.Xaml.Data.h>
+#include "../Backend/BackendService.h"
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct TrainingViewModel : TrainingViewModelT<TrainingViewModel>
+    class TrainingViewModel
     {
+    public:
         TrainingViewModel();
+        ~TrainingViewModel() = default;
 
-        double Progress();
+        double Progress() const { return m_progress; }
         void Progress(double value);
-        double CurrentLoss();
+        double CurrentLoss() const { return m_currentLoss; }
         void CurrentLoss(double value);
-        double CurrentAccuracy();
+        double CurrentAccuracy() const { return m_currentAccuracy; }
         void CurrentAccuracy(double value);
-        winrt::hstring StatusText();
+        winrt::hstring StatusText() const { return m_statusText; }
         void StatusText(winrt::hstring const& value);
 
         void StartTraining(winrt::hstring const& modelId);
@@ -36,9 +40,4 @@ namespace winrt::ArtificialFlash::implementation
 
         void RaisePropertyChanged(winrt::hstring const& name);
     };
-}
-
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct TrainingViewModel : TrainingViewModelT<TrainingViewModel, implementation::TrainingViewModel> {};
 }

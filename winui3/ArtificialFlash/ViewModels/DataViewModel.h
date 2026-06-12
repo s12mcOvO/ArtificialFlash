@@ -1,16 +1,19 @@
 #pragma once
-#include "DataViewModel.g.h"
+#include <winrt/Microsoft.UI.Xaml.Data.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include "../Backend/BackendService.h"
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    struct DataViewModel : DataViewModelT<DataViewModel>
+    class DataViewModel
     {
-        DataViewModel() = default;
+    public:
+        DataViewModel();
+        ~DataViewModel() = default;
 
-        Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> Datasets();
+        Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable> Datasets() const { return m_datasets; }
         void Refresh();
-        void AddDataset(winrt::hstring const& name,
-            winrt::hstring const& path, winrt::hstring const& type);
+        void AddDataset(winrt::hstring const& name, winrt::hstring const& path, winrt::hstring const& type);
         void DeleteDataset(winrt::hstring const& id);
 
         winrt::event_token PropertyChanged(
@@ -24,9 +27,4 @@ namespace winrt::ArtificialFlash::implementation
 
         void RaisePropertyChanged(winrt::hstring const& name);
     };
-}
-
-namespace winrt::ArtificialFlash::factory_implementation
-{
-    struct DataViewModel : DataViewModelT<DataViewModel, implementation::DataViewModel> {};
 }

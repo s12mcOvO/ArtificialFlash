@@ -1,33 +1,31 @@
 #include "pch.h"
 #include "HomeViewModel.h"
-#include "../Backend/BackendService.h"
-#include "../Models/Model.h"
-#include "../Models/Dataset.h"
 
 using ::ArtificialFlash::Backend::BackendService;
 using ::ArtificialFlash::Models::TrainingStatus;
 
-namespace winrt::ArtificialFlash::implementation
+namespace ArtificialFlash
 {
-    int32_t HomeViewModel::DatasetCount() { return m_datasetCount; }
+    HomeViewModel::HomeViewModel()
+    {
+        Refresh();
+    }
+
     void HomeViewModel::DatasetCount(int32_t value)
     {
         if (m_datasetCount != value) { m_datasetCount = value; RaisePropertyChanged(L"DatasetCount"); }
     }
 
-    int32_t HomeViewModel::ModelCount() { return m_modelCount; }
     void HomeViewModel::ModelCount(int32_t value)
     {
         if (m_modelCount != value) { m_modelCount = value; RaisePropertyChanged(L"ModelCount"); }
     }
 
-    bool HomeViewModel::IsTrainingActive() { return m_isTrainingActive; }
     void HomeViewModel::IsTrainingActive(bool value)
     {
         if (m_isTrainingActive != value) { m_isTrainingActive = value; RaisePropertyChanged(L"IsTrainingActive"); }
     }
 
-    winrt::hstring HomeViewModel::BackendStatus() { return m_backendStatus; }
     void HomeViewModel::BackendStatus(winrt::hstring const& value)
     {
         if (m_backendStatus != value) { m_backendStatus = value; RaisePropertyChanged(L"BackendStatus"); }
