@@ -1,6 +1,6 @@
 #pragma once
+#include "App.g.h"
 #include <winrt/Microsoft.UI.Xaml.h>
-#include <memory>
 
 namespace winrt::ArtificialFlash::implementation
 {

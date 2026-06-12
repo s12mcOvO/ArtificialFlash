@@ -3,16 +3,11 @@
 #include "MainWindow.h"
 #include "Backend/BackendService.h"
 
-#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
-#include <winrt/Microsoft.UI.Xaml.Hosting.desktop-windowxamlsource.h>
-#endif
-
 namespace winrt::ArtificialFlash::implementation
 {
     App::App()
     {
         InitializeBackend();
-        Microsoft::UI::Xaml::Application::Current().Suspending([this](auto&&, auto&&) { ShutdownBackend(); });
     }
 
     App::~App()
