@@ -1,45 +1,47 @@
 #include "pch.h"
 #include "DataPage.h"
-#include <winrt/Windows.UI.Popups.h>
 
-using namespace winrt::Microsoft::UI::Xaml;
-using namespace winrt::Windows::UI::Popups;
+using namespace Microsoft::UI::Xaml;
 
 namespace winrt::ArtificialFlash::implementation
 {
     DataPage::DataPage()
     {
-        InitializeComponent();
         m_viewModel = *winrt::make<ArtificialFlash::implementation::DataViewModel>();
         m_viewModel.Refresh();
+
+        auto stack = Controls::StackPanel();
+        stack.Margin(Thickness{ 16, 16, 16, 16 });
+
+        auto title = Controls::TextBlock();
+        title.Text(L"Datasets");
+        title.Style(Controls::TextStyle::TitleLarge);
+        title.Margin(Thickness{ 0, 0, 0, 16 });
+        stack.Children().Append(title);
+
+        auto addBtn = Controls::Button();
+        addBtn.Content(box_value(L"Add Dataset"));
+        addBtn.Margin(Thickness{ 0, 0, 0, 16 });
+        stack.Children().Append(addBtn);
+
+        Content(stack);
     }
 
     void DataPage::OnAddDataset(
         Windows::Foundation::IInspectable const&,
         RoutedEventArgs const&)
     {
-        // TODO: Show file picker dialog
-        m_viewModel.AddDataset(L"New Dataset", L"C:\\data", L"image");
     }
 
     void DataPage::OnDownloadFromUrl(
         Windows::Foundation::IInspectable const&,
         RoutedEventArgs const&)
     {
-        auto url = UrlTextBox().Text();
-        auto name = NameTextBox().Text();
-        if (!url.empty() && !name.empty())
-        {
-            m_viewModel.AddDataset(name, url, L"mixed");
-        }
     }
 
     void DataPage::OnDownloadBuiltIn(
-        Windows::Foundation::IInspectable const& sender,
+        Windows::Foundation::IInspectable const&,
         RoutedEventArgs const&)
     {
-        auto btn = sender.as<Controls::Button>();
-        auto tag = btn.Tag().as<winrt::hstring>();
-        m_viewModel.AddDataset(tag, L"builtin://" + tag, L"image");
     }
 }

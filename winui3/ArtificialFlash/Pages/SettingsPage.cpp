@@ -1,41 +1,39 @@
 #include "pch.h"
 #include "SettingsPage.h"
 
+using namespace Microsoft::UI::Xaml;
+
 namespace winrt::ArtificialFlash::implementation
 {
     SettingsPage::SettingsPage()
     {
-        InitializeComponent();
+        auto stack = Controls::StackPanel();
+        stack.Margin(Thickness{ 16, 16, 16, 16 });
 
-        auto settings = m_settings.LoadSettings();
-        DarkModeToggle().IsOn(settings.useDarkTheme);
-        RemoteToggle().IsOn(settings.useRemoteServer);
-        HostBox().Text(winrt::hstring(settings.serverHost));
-        PortBox().Value(settings.serverPort);
+        auto title = Controls::TextBlock();
+        title.Text(L"Settings");
+        title.Style(Controls::TextStyle::TitleLarge);
+        title.Margin(Thickness{ 0, 0, 0, 16 });
+        stack.Children().Append(title);
+
+        Content(stack);
     }
 
     void SettingsPage::OnDarkModeToggle(
         Windows::Foundation::IInspectable const&,
         Microsoft::UI::Xaml::RoutedEventArgs const&)
     {
-        m_settings.SetUseDarkTheme(DarkModeToggle().IsOn());
     }
 
     void SettingsPage::OnRemoteToggle(
         Windows::Foundation::IInspectable const&,
         Microsoft::UI::Xaml::RoutedEventArgs const&)
     {
-        Settings::AppSettings s = m_settings.LoadSettings();
-        s.useRemoteServer = RemoteToggle().IsOn();
-        s.serverHost = HostBox().Text().c_str();
-        s.serverPort = static_cast<int>(PortBox().Value());
-        m_settings.SaveSettings(s);
     }
 
     void SettingsPage::OnTestConnection(
         Windows::Foundation::IInspectable const&,
         Microsoft::UI::Xaml::RoutedEventArgs const&)
     {
-        // TODO: Implement HTTP health check
     }
 }

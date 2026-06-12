@@ -1,5 +1,7 @@
 #pragma once
-#include "MainWindow.xaml.g.h"
+#include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#include <winrt/Microsoft.UI.Xaml.Navigation.h>
 
 namespace winrt::ArtificialFlash::implementation
 {
@@ -10,11 +12,10 @@ namespace winrt::ArtificialFlash::implementation
         void OnNavigationChanged(
             Microsoft::UI::Xaml::Controls::NavigationView const&,
             Microsoft::UI::Xaml::Controls::NavigationViewSelectionChangedEventArgs const&);
-        void OnNavLoaded(
-            winrt::Windows::Foundation::IInspectable const&,
-            winrt::Windows::Foundation::IInspectable const&);
 
     private:
+        Microsoft::UI::Xaml::Controls::NavigationView m_navView{ nullptr };
+        Microsoft::UI::Xaml::Controls::Frame m_contentFrame{ nullptr };
         void NavigateToPage(winrt::hstring const& tag);
     };
 }
