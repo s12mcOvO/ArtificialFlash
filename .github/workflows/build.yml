@@ -23,8 +23,11 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
       - name: Restore NuGet packages
-        run: msbuild winui3\ArtificialFlash.sln -t:restore
+        run: nuget restore winui3\ArtificialFlash.sln
 
       - name: Build solution (Release x64)
         run: msbuild winui3\ArtificialFlash.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackage=false
@@ -47,8 +50,11 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
       - name: Restore NuGet packages
-        run: msbuild winui3\ArtificialFlash.sln -t:restore
+        run: nuget restore winui3\ArtificialFlash.sln
 
       - name: Create test certificate
         shell: pwsh
