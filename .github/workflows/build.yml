@@ -26,6 +26,11 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore winui3\ArtificialFlash.sln
 
+      - name: List restored packages
+        run: |
+          if exist "winui3\packages" (dir winui3\packages /b) else (echo "No packages dir at winui3\packages")
+          if exist "packages" (dir packages /b) else (echo "No packages dir at root")
+
       - name: Build solution (Release x64)
         run: msbuild winui3\ArtificialFlash.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackage=false
 
