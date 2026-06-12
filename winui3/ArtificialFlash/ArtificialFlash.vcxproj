@@ -138,7 +138,6 @@
     <Page Include="Pages\TrainingPage.xaml" />
     <Page Include="Pages\SettingsPage.xaml" />
     <Page Include="Controls\StatusBadge.xaml" />
-    <Page Include="Controls\TrainingChart.xaml" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
