@@ -129,16 +129,16 @@
     <Midl Include="Converters\ValueConverters.idl" />
   </ItemGroup>
   <ItemGroup>
-    <Xaml Include="App.xaml" />
-    <Xaml Include="MainWindow.xaml" />
-    <Xaml Include="Pages\HomePage.xaml" />
-    <Xaml Include="Pages\DataPage.xaml" />
-    <Xaml Include="Pages\ModelsPage.xaml" />
-    <Xaml Include="Pages\ModelConfigPage.xaml" />
-    <Xaml Include="Pages\TrainingPage.xaml" />
-    <Xaml Include="Pages\SettingsPage.xaml" />
-    <Xaml Include="Controls\StatusBadge.xaml" />
-    <Xaml Include="Controls\TrainingChart.xaml" />
+    <Page Include="App.xaml" />
+    <Page Include="MainWindow.xaml" />
+    <Page Include="Pages\HomePage.xaml" />
+    <Page Include="Pages\DataPage.xaml" />
+    <Page Include="Pages\ModelsPage.xaml" />
+    <Page Include="Pages\ModelConfigPage.xaml" />
+    <Page Include="Pages\TrainingPage.xaml" />
+    <Page Include="Pages\SettingsPage.xaml" />
+    <Page Include="Controls\StatusBadge.xaml" />
+    <Page Include="Controls\TrainingChart.xaml" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -152,6 +152,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
     <Import Project="$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\build\native\Microsoft.WindowsAppSDK.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\build\native\Microsoft.WindowsAppSDK.targets')" />
+    <Import Project="$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\buildTransitive\Microsoft.UI.Xaml.Markup.Compiler.interop.targets')" />
     <Import Project="$(SolutionDir)packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets')" />
   </ImportGroup>
 </Project>
