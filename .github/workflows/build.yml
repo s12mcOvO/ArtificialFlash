@@ -23,26 +23,22 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
-      - name: Install Windows App SDK
-        shell: pwsh
-        run: |
-          $ProgressPreference = 'SilentlyContinue'
-          Invoke-WebRequest -Uri "https://aka.ms/windowsappsdk/1.5-stable" -OutFile "$env:TEMP\WindowsAppSDKinstaller.exe"
-          Start-Process "$env:TEMP\WindowsAppSDKinstaller.exe" -ArgumentList "--silent --quiet --accept --install Winget" -Wait -NoNewWindow
-
-      - name: Find WinMD files after install
-        shell: pwsh
-        run: |
-          echo "=== WindowsApps WinMD ==="
-          Get-ChildItem "C:\Program Files\WindowsApps" -Directory -Filter "Microsoft.WindowsAppSDK*" -ErrorAction SilentlyContinue | ForEach-Object { echo $_.FullName }
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\References" -Directory -ErrorAction SilentlyContinue | ForEach-Object { echo "Ref: $($_.FullName)" }
-          echo "=== WinUI WinMD search ==="
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\References" -Recurse -Filter "Microsoft.UI.Xaml.winmd" -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { echo $_.FullName }
-          echo "=== Program Files WindowsApps search ==="
-          Get-ChildItem "C:\Program Files\WindowsApps" -Recurse -Filter "Microsoft.UI.Xaml.winmd" -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { echo $_.FullName }
-
       - name: Restore NuGet packages
         run: nuget restore winui3\ArtificialFlash.sln
+
+      - name: Find WinMD references
+        id: winmd
+        shell: pwsh
+        run: |
+          $refPkg = "winui3\packages\Microsoft.WindowsAppSDK.Ref.1.5.240627000"
+          $winmd = Get-ChildItem $refPkg -Recurse -Filter "Microsoft.UI.Xaml.winmd" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($winmd) {
+            echo "WINMD_PATH=$($winmd.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+            echo "Found WinMD: $($winmd.FullName)"
+          } else {
+            echo "No WinMD found. Listing package contents:"
+            Get-ChildItem $refPkg -Recurse -Depth 3 | ForEach-Object { echo $_.FullName }
+          }
 
       - name: Build solution (Release x64)
         run: msbuild winui3\ArtificialFlash.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackage=false
@@ -64,13 +60,6 @@ jobs:
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
-
-      - name: Install Windows App SDK
-        shell: pwsh
-        run: |
-          $ProgressPreference = 'SilentlyContinue'
-          Invoke-WebRequest -Uri "https://aka.ms/windowsappsdk/1.5-stable" -OutFile "$env:TEMP\WindowsAppSDKinstaller.exe"
-          Start-Process "$env:TEMP\WindowsAppSDKinstaller.exe" -ArgumentList "--silent --quiet --accept --install Winget" -Wait -NoNewWindow
 
       - name: Restore NuGet packages
         run: nuget restore winui3\ArtificialFlash.sln
