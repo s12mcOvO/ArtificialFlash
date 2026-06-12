@@ -139,10 +139,12 @@
   <ItemGroup>
     <None Include="..\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" />
     <None Include="..\packages\Microsoft.WindowsAppSDK.1.6.250108002\build\native\Microsoft.WindowsAppSDK.targets" />
+    <None Include="..\packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
     <Import Project="$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\build\native\Microsoft.WindowsAppSDK.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.WindowsAppSDK.1.6.250108002\build\native\Microsoft.WindowsAppSDK.targets')" />
+    <Import Project="$(SolutionDir)packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('$(SolutionDir)packages\Microsoft.Web.WebView2.1.0.2903.40\build\native\Microsoft.Web.WebView2.targets')" />
   </ImportGroup>
 </Project>
