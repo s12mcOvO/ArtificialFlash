@@ -4,8 +4,6 @@ namespace ArtificialFlash
     runtimeclass TrainingChart : Microsoft.UI.Xaml.Controls.Control
     {
         TrainingChart();
-        static Microsoft.UI.Xaml.DependencyProperty LossValuesProperty{ get; };
-        static Microsoft.UI.Xaml.DependencyProperty AccuracyValuesProperty{ get; };
         Windows.Foundation.Collections.IVector<Double> LossValues;
         Windows.Foundation.Collections.IVector<Double> AccuracyValues;
     }
