@@ -7,15 +7,8 @@ namespace ArtificialFlash
 {
     void ModelsViewModel::Refresh()
     {
-        m_models.Clear();
         auto& backend = BackendService::Instance();
-        for (const auto& model : backend.ListModels())
-        {
-            auto obj = winrt::Windows::Foundation::PropertyValue::CreateString(
-                winrt::hstring(model.name + L" (" + model.type + L")"));
-            m_models.Append(obj);
-        }
-        RaisePropertyChanged(L"Models");
+        backend.ListModels();
     }
 
     void ModelsViewModel::CreateModel(winrt::hstring const& name,
@@ -31,22 +24,5 @@ namespace ArtificialFlash
         auto& backend = BackendService::Instance();
         backend.DeleteModel(id.c_str());
         Refresh();
-    }
-
-    winrt::event_token ModelsViewModel::PropertyChanged(
-        Microsoft::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
-    {
-        return m_propertyChanged.add(handler);
-    }
-
-    void ModelsViewModel::PropertyChanged(winrt::event_token const& token)
-    {
-        m_propertyChanged.remove(token);
-    }
-
-    void ModelsViewModel::RaisePropertyChanged(winrt::hstring const& name)
-    {
-        m_propertyChanged(*this,
-            Microsoft::UI::Xaml::Data::PropertyChangedEventArgs(name));
     }
 }

@@ -4,7 +4,7 @@
 
 using ::ArtificialFlash::Backend::BackendService;
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
+int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
     winrt::init_apartment(winrt::apartment_type::single_threaded);
 
