@@ -1,18 +1,19 @@
 #include "pch.h"
 #include "SettingsPage.h"
 
-using namespace Microsoft::UI::Xaml;
+using namespace winrt;
+using namespace winrt::Microsoft::UI::Xaml;
+using namespace winrt::Microsoft::UI::Xaml::Controls;
 
 namespace winrt::ArtificialFlash::implementation
 {
     SettingsPage::SettingsPage()
     {
-        auto stack = Controls::StackPanel();
+        auto stack = StackPanel();
         stack.Margin(Thickness{ 16, 16, 16, 16 });
 
-        auto title = Controls::TextBlock();
+        auto title = TextBlock();
         title.Text(L"Settings");
-        title.Style(Controls::TextStyle::TitleLarge);
         title.Margin(Thickness{ 0, 0, 0, 16 });
         stack.Children().Append(title);
 
@@ -21,19 +22,11 @@ namespace winrt::ArtificialFlash::implementation
 
     void SettingsPage::OnDarkModeToggle(
         Windows::Foundation::IInspectable const&,
-        Microsoft::UI::Xaml::RoutedEventArgs const&)
-    {
-    }
-
+        RoutedEventArgs const&) {}
     void SettingsPage::OnRemoteToggle(
         Windows::Foundation::IInspectable const&,
-        Microsoft::UI::Xaml::RoutedEventArgs const&)
-    {
-    }
-
+        RoutedEventArgs const&) {}
     void SettingsPage::OnTestConnection(
         Windows::Foundation::IInspectable const&,
-        Microsoft::UI::Xaml::RoutedEventArgs const&)
-    {
-    }
+        RoutedEventArgs const&) {}
 }

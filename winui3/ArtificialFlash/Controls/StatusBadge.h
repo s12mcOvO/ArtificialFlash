@@ -1,11 +1,12 @@
 #pragma once
 #include "StatusBadge.g.h"
+#include <winrt/Microsoft.UI.Xaml.h>
 
 namespace winrt::ArtificialFlash::implementation
 {
     struct StatusBadge : StatusBadgeT<StatusBadge>
     {
-        StatusBadge() { DefaultStyleKey(box_value(L"ArtificialFlash.StatusBadge")); }
+        StatusBadge() = default;
 
         winrt::hstring Status() { return GetValue(m_statusProperty).as<winrt::hstring>(); }
         void Status(winrt::hstring const& value) { SetValue(m_statusProperty, box_value(value)); }

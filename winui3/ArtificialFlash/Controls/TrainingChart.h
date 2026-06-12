@@ -1,5 +1,6 @@
 #pragma once
 #include "TrainingChart.g.h"
+#include <winrt/Microsoft.UI.Xaml.h>
 
 namespace winrt::ArtificialFlash::implementation
 {
