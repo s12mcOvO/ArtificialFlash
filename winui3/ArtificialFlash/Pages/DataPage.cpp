@@ -9,7 +9,7 @@ namespace winrt::ArtificialFlash::implementation
 {
     DataPage::DataPage()
     {
-        m_viewModel = *make<ArtificialFlash::implementation::DataViewModel>();
+        m_viewModel = make<ArtificialFlash::implementation::DataViewModel>();
         m_viewModel.Refresh();
 
         auto stack = StackPanel();

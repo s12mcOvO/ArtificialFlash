@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "DataViewModel.h"
 #include "../Backend/BackendService.h"
-#include "../Models/Dataset.h"
+
+using ::ArtificialFlash::Backend::BackendService;
 
 namespace winrt::ArtificialFlash::implementation
 {
@@ -14,7 +15,7 @@ namespace winrt::ArtificialFlash::implementation
     void DataViewModel::Refresh()
     {
         m_datasets.Clear();
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         for (const auto& ds : backend.ListDatasets())
         {
             auto obj = winrt::Windows::Foundation::PropertyValue::CreateString(
@@ -27,14 +28,14 @@ namespace winrt::ArtificialFlash::implementation
     void DataViewModel::AddDataset(winrt::hstring const& name,
         winrt::hstring const& path, winrt::hstring const& type)
     {
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         backend.CreateDataset(name.c_str(), path.c_str(), type.c_str());
         Refresh();
     }
 
     void DataViewModel::DeleteDataset(winrt::hstring const& id)
     {
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         backend.DeleteDataset(id.c_str());
         Refresh();
     }

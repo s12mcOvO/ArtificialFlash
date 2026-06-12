@@ -9,16 +9,16 @@ namespace winrt::ArtificialFlash::implementation
     DependencyProperty TrainingChart::m_lossProperty =
         DependencyProperty::Register(
             L"LossValues",
-            winrt::xaml_typename<Windows::Foundation::Collections::IVector<double>>(),
-            winrt::xaml_typename<ArtificialFlash::TrainingChart>(),
+            xaml_typename<Windows::Foundation::Collections::IVector<double>>(),
+            xaml_typename<ArtificialFlash::TrainingChart>(),
             PropertyMetadata{ nullptr }
         );
 
     DependencyProperty TrainingChart::m_accuracyProperty =
         DependencyProperty::Register(
             L"AccuracyValues",
-            winrt::xaml_typename<Windows::Foundation::Collections::IVector<double>>(),
-            winrt::xaml_typename<ArtificialFlash::TrainingChart>(),
+            xaml_typename<Windows::Foundation::Collections::IVector<double>>(),
+            xaml_typename<ArtificialFlash::TrainingChart>(),
             PropertyMetadata{ nullptr }
         );
 

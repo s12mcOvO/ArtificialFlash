@@ -3,6 +3,8 @@
 #include "MainWindow.h"
 #include "Backend/BackendService.h"
 
+using ::ArtificialFlash::Backend::BackendService;
+
 namespace winrt::ArtificialFlash::implementation
 {
     App::App()
@@ -23,11 +25,11 @@ namespace winrt::ArtificialFlash::implementation
 
     void App::InitializeBackend()
     {
-        Backend::BackendService::Instance().Initialize();
+        BackendService::Instance().Initialize();
     }
 
     void App::ShutdownBackend()
     {
-        Backend::BackendService::Instance().Shutdown();
+        BackendService::Instance().Shutdown();
     }
 }

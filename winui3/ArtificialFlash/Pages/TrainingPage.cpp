@@ -9,7 +9,7 @@ namespace winrt::ArtificialFlash::implementation
 {
     TrainingPage::TrainingPage()
     {
-        m_viewModel = *make<ArtificialFlash::implementation::TrainingViewModel>();
+        m_viewModel = make<ArtificialFlash::implementation::TrainingViewModel>();
 
         auto stack = StackPanel();
         stack.Margin(Thickness{ 16, 16, 16, 16 });

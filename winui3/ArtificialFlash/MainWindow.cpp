@@ -7,8 +7,8 @@
 #include "Pages/SettingsPage.h"
 
 using namespace winrt;
-using namespace Microsoft::UI::Xaml;
-using namespace Microsoft::UI::Xaml::Controls;
+using namespace winrt::Microsoft::UI::Xaml;
+using namespace winrt::Microsoft::UI::Xaml::Controls;
 
 namespace winrt::ArtificialFlash::implementation
 {
@@ -75,16 +75,16 @@ namespace winrt::ArtificialFlash::implementation
     void MainWindow::NavigateToPage(winrt::hstring const& tag)
     {
         if (tag == L"home")
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::HomePage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::HomePage>());
         else if (tag == L"data")
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::DataPage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::DataPage>());
         else if (tag == L"models")
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::ModelsPage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::ModelsPage>());
         else if (tag == L"training")
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::TrainingPage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::TrainingPage>());
         else if (tag == L"settings")
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::SettingsPage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::SettingsPage>());
         else
-            m_contentFrame.Navigate(xaml_typename<ArtificialFlash::HomePage>());
+            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::HomePage>());
     }
 }

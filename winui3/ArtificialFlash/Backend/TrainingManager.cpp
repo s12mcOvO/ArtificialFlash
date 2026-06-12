@@ -95,17 +95,18 @@ namespace ArtificialFlash::Backend
         m_engines[sessionId] = std::move(engine);
 
         auto weakSession = sessionId;
+        auto* self = this;
         m_trainingFutures[sessionId] = std::async(std::launch::async,
             [rawEngine, rawModel, trainData, trainLabels,
             valData, valLabels, onMetrics = std::move(onMetrics),
-            weakSession, this]()
+            weakSession, self]()
             {
                 rawEngine->RunTraining(
                     std::unique_ptr<NeuralNetwork>(rawModel),
                     trainData, trainLabels,
                     valData, valLabels,
-                    [&](const TrainingMetrics& m) {
-                        auto* s = GetSession(weakSession);
+                    [self, &weakSession](const TrainingMetrics& m) {
+                        auto* s = self->GetSession(weakSession);
                         if (s)
                         {
                             s->currentEpoch = m.epoch;
@@ -122,23 +123,22 @@ namespace ArtificialFlash::Backend
                             log.valLoss = m.valLoss;
                             log.valAccuracy = m.valAccuracy;
                             log.timestamp = std::chrono::system_clock::now();
-                            AddLog(weakSession, log);
+                            self->AddLog(weakSession, log);
                         }
                         if (onMetrics) onMetrics(m);
                     },
-                    [this, &weakSession]() -> bool {
-                        auto* s = GetSession(weakSession);
+                    [self, &weakSession]() -> bool {
+                        auto* s = self->GetSession(weakSession);
                         return s && s->status == Models::TrainingStatus::Stopped;
                     });
 
-                auto* s = GetSession(weakSession);
+                auto* s = self->GetSession(weakSession);
                 if (s) {
                     s->status = Models::TrainingStatus::Completed;
                     s->progress = 1.0;
                 }
 
-                rawModel = nullptr;
-                m_engines.erase(weakSession);
+                self->m_engines.erase(weakSession);
             });
 
         return true;

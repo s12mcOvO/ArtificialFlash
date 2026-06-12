@@ -2,15 +2,16 @@
 #include "TrainingViewModel.h"
 #include "../Backend/BackendService.h"
 
+using ::ArtificialFlash::Backend::BackendService;
+
 namespace winrt::ArtificialFlash::implementation
 {
     TrainingViewModel::TrainingViewModel()
     {
-        auto& backend = Backend::BackendService::Instance();
-        backend.SetTrainingCallback([this](const Models::TrainingLog& log)
+        auto& backend = BackendService::Instance();
+        backend.SetTrainingCallback([this](const ::ArtificialFlash::Models::TrainingLog& log)
         {
-            Progress(static_cast<double>(log.epoch) /
-                (log.epoch + 1));
+            Progress(static_cast<double>(log.epoch) / (log.epoch + 1));
             CurrentLoss(log.loss);
             CurrentAccuracy(log.accuracy);
             auto msg = L"Epoch " + std::to_wstring(log.epoch) +
@@ -46,7 +47,7 @@ namespace winrt::ArtificialFlash::implementation
 
     void TrainingViewModel::StartTraining(winrt::hstring const& modelId)
     {
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         m_currentSessionId = backend.StartTraining(modelId.c_str());
         if (!m_currentSessionId.empty())
             StatusText(L"Training started...");
@@ -58,7 +59,7 @@ namespace winrt::ArtificialFlash::implementation
     {
         if (!m_currentSessionId.empty())
         {
-            Backend::BackendService::Instance().PauseTraining(m_currentSessionId);
+            BackendService::Instance().PauseTraining(m_currentSessionId);
             StatusText(L"Paused");
         }
     }
@@ -67,7 +68,7 @@ namespace winrt::ArtificialFlash::implementation
     {
         if (!m_currentSessionId.empty())
         {
-            Backend::BackendService::Instance().ResumeTraining(m_currentSessionId);
+            BackendService::Instance().ResumeTraining(m_currentSessionId);
             StatusText(L"Resumed");
         }
     }
@@ -76,7 +77,7 @@ namespace winrt::ArtificialFlash::implementation
     {
         if (!m_currentSessionId.empty())
         {
-            Backend::BackendService::Instance().StopTraining(m_currentSessionId);
+            BackendService::Instance().StopTraining(m_currentSessionId);
             StatusText(L"Stopped");
         }
     }
@@ -85,7 +86,7 @@ namespace winrt::ArtificialFlash::implementation
     {
         if (!m_currentSessionId.empty())
         {
-            auto session = Backend::BackendService::Instance()
+            auto session = BackendService::Instance()
                 .GetTrainingSession(m_currentSessionId);
             Progress(session.progress);
             CurrentLoss(session.currentLoss);

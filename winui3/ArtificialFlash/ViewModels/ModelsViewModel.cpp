@@ -2,6 +2,8 @@
 #include "ModelsViewModel.h"
 #include "../Backend/BackendService.h"
 
+using ::ArtificialFlash::Backend::BackendService;
+
 namespace winrt::ArtificialFlash::implementation
 {
     Windows::Foundation::Collections::IVector<Windows::Foundation::IInspectable>
@@ -13,7 +15,7 @@ namespace winrt::ArtificialFlash::implementation
     void ModelsViewModel::Refresh()
     {
         m_models.Clear();
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         for (const auto& model : backend.ListModels())
         {
             auto obj = winrt::Windows::Foundation::PropertyValue::CreateString(
@@ -26,14 +28,14 @@ namespace winrt::ArtificialFlash::implementation
     void ModelsViewModel::CreateModel(winrt::hstring const& name,
         winrt::hstring const& type)
     {
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         backend.CreateModel(name.c_str(), type.c_str(), L"", L"", {});
         Refresh();
     }
 
     void ModelsViewModel::DeleteModel(winrt::hstring const& id)
     {
-        auto& backend = Backend::BackendService::Instance();
+        auto& backend = BackendService::Instance();
         backend.DeleteModel(id.c_str());
         Refresh();
     }

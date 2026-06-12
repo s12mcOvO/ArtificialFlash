@@ -9,7 +9,7 @@ namespace winrt::ArtificialFlash::implementation
 {
     ModelsPage::ModelsPage()
     {
-        m_viewModel = *make<ArtificialFlash::implementation::ModelsViewModel>();
+        m_viewModel = make<ArtificialFlash::implementation::ModelsViewModel>();
         m_viewModel.Refresh();
 
         auto stack = StackPanel();

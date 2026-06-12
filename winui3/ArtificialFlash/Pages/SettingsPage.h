@@ -16,7 +16,8 @@ namespace winrt::ArtificialFlash::implementation
             Microsoft::UI::Xaml::RoutedEventArgs const&);
 
     private:
-        Services::SettingsService& m_settings = Services::SettingsService::Instance();
+        ::ArtificialFlash::Services::SettingsService& m_settings =
+            ::ArtificialFlash::Services::SettingsService::Instance();
     };
 }
 
