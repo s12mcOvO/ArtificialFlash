@@ -16,9 +16,6 @@ namespace winrt::ArtificialFlash::implementation
     {
         Title(L"ArtificialFlash");
 
-        m_contentFrame = Frame();
-        Content(m_contentFrame);
-
         auto homeItem = NavigationViewItem();
         homeItem.Content(box_value(L"Home"));
         homeItem.Tag(box_value(L"home"));
@@ -50,13 +47,11 @@ namespace winrt::ArtificialFlash::implementation
         m_navView.MenuItems().Append(modelsItem);
         m_navView.MenuItems().Append(trainingItem);
         m_navView.MenuItems().Append(settingsItem);
-        m_navView.Content(m_contentFrame);
         m_navView.IsBackButtonVisible(NavigationViewBackButtonVisible::Collapsed);
-
         m_navView.SelectionChanged({ this, &MainWindow::OnNavigationChanged });
+        m_navView.SelectedItem(homeItem);
 
         Content(m_navView);
-        m_navView.SelectedItem(homeItem);
         NavigateToPage(L"home");
     }
 
@@ -74,17 +69,19 @@ namespace winrt::ArtificialFlash::implementation
 
     void MainWindow::NavigateToPage(winrt::hstring const& tag)
     {
+        Windows::Foundation::IInspectable page;
         if (tag == L"home")
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::HomePage>());
+            page = make<ArtificialFlash::implementation::HomePage>();
         else if (tag == L"data")
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::DataPage>());
+            page = make<ArtificialFlash::implementation::DataPage>();
         else if (tag == L"models")
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::ModelsPage>());
+            page = make<ArtificialFlash::implementation::ModelsPage>();
         else if (tag == L"training")
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::TrainingPage>());
+            page = make<ArtificialFlash::implementation::TrainingPage>();
         else if (tag == L"settings")
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::SettingsPage>());
+            page = make<ArtificialFlash::implementation::SettingsPage>();
         else
-            m_contentFrame.Navigate(winrt::xaml_typename<ArtificialFlash::HomePage>());
+            page = make<ArtificialFlash::implementation::HomePage>();
+        m_navView.Content(page);
     }
 }

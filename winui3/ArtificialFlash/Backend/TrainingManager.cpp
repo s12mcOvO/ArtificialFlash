@@ -105,7 +105,7 @@ namespace ArtificialFlash::Backend
                     std::unique_ptr<NeuralNetwork>(rawModel),
                     trainData, trainLabels,
                     valData, valLabels,
-                    [self, &weakSession](const TrainingMetrics& m) {
+                    [self, &weakSession, &onMetrics](const TrainingMetrics& m) {
                         auto* s = self->GetSession(weakSession);
                         if (s)
                         {

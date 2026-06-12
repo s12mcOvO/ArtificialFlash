@@ -9,8 +9,9 @@ namespace winrt::ArtificialFlash::implementation
 {
     HomePage::HomePage()
     {
-        m_viewModel = make<ArtificialFlash::implementation::HomeViewModel>();
-        m_viewModel.Refresh();
+        auto vmImpl = winrt::make_self<ArtificialFlash::implementation::HomeViewModel>();
+        vmImpl->Refresh();
+        m_viewModel = vmImpl.as<ArtificialFlash::HomeViewModel>();
 
         auto stack = StackPanel();
         stack.Margin(Thickness{ 16, 16, 16, 16 });

@@ -1,6 +1,9 @@
 #pragma once
-#include "TrainingChart.g.h"
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include "TrainingChart.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
@@ -8,22 +11,15 @@ namespace winrt::ArtificialFlash::implementation
     {
         TrainingChart();
 
-        Windows::Foundation::Collections::IVector<double> LossValues()
-        { return GetValue(m_lossProperty).as<Windows::Foundation::Collections::IVector<double>>(); }
-        void LossValues(Windows::Foundation::Collections::IVector<double> const& value)
-        { SetValue(m_lossProperty, value); }
+        Windows::Foundation::Collections::IVector<double> LossValues() { return m_lossValues; }
+        void LossValues(Windows::Foundation::Collections::IVector<double> const& value) { m_lossValues = value; }
 
-        Windows::Foundation::Collections::IVector<double> AccuracyValues()
-        { return GetValue(m_accuracyProperty).as<Windows::Foundation::Collections::IVector<double>>(); }
-        void AccuracyValues(Windows::Foundation::Collections::IVector<double> const& value)
-        { SetValue(m_accuracyProperty, value); }
-
-        static Microsoft::UI::Xaml::DependencyProperty LossValuesProperty() { return m_lossProperty; }
-        static Microsoft::UI::Xaml::DependencyProperty AccuracyValuesProperty() { return m_accuracyProperty; }
+        Windows::Foundation::Collections::IVector<double> AccuracyValues() { return m_accuracyValues; }
+        void AccuracyValues(Windows::Foundation::Collections::IVector<double> const& value) { m_accuracyValues = value; }
 
     private:
-        static Microsoft::UI::Xaml::DependencyProperty m_lossProperty;
-        static Microsoft::UI::Xaml::DependencyProperty m_accuracyProperty;
+        Windows::Foundation::Collections::IVector<double> m_lossValues{ nullptr };
+        Windows::Foundation::Collections::IVector<double> m_accuracyValues{ nullptr };
     };
 }
 

@@ -1,6 +1,11 @@
 #pragma once
-#include "StatusBadge.g.h"
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#include <winrt/Microsoft.UI.Xaml.Media.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include "StatusBadge.g.h"
 
 namespace winrt::ArtificialFlash::implementation
 {
@@ -8,13 +13,11 @@ namespace winrt::ArtificialFlash::implementation
     {
         StatusBadge() = default;
 
-        winrt::hstring Status() { return GetValue(m_statusProperty).as<winrt::hstring>(); }
-        void Status(winrt::hstring const& value) { SetValue(m_statusProperty, box_value(value)); }
-
-        static Microsoft::UI::Xaml::DependencyProperty StatusProperty() { return m_statusProperty; }
+        winrt::hstring Status() { return m_status; }
+        void Status(winrt::hstring const& value) { m_status = value; }
 
     private:
-        static Microsoft::UI::Xaml::DependencyProperty m_statusProperty;
+        winrt::hstring m_status;
     };
 }
 

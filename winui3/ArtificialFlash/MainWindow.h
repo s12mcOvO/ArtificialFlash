@@ -16,7 +16,6 @@ namespace winrt::ArtificialFlash::implementation
 
     private:
         Microsoft::UI::Xaml::Controls::NavigationView m_navView{ nullptr };
-        Microsoft::UI::Xaml::Controls::Frame m_contentFrame{ nullptr };
         void NavigateToPage(winrt::hstring const& tag);
     };
 }
