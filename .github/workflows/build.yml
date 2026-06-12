@@ -26,27 +26,17 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore winui3\ArtificialFlash.sln
 
-      - name: Diagnose packages
+      - name: Find WinMD files in WindowsAppSDK
         shell: pwsh
         run: |
-          echo "=== SolutionDir packages ==="
-          if (Test-Path "winui3\packages") {
-            Get-ChildItem "winui3\packages" -Directory | ForEach-Object { $_.Name }
-          } else {
-            echo "winui3\packages does not exist"
+          $sdkPkg = "winui3\packages\Microsoft.WindowsAppSDK.1.5.240428000"
+          echo "=== All .winmd files ==="
+          Get-ChildItem $sdkPkg -Recurse -Filter "*.winmd" -ErrorAction SilentlyContinue | ForEach-Object { echo $_.FullName }
+          echo ""
+          echo "=== Build/native contents ==="
+          if (Test-Path "$sdkPkg\build\native") {
+            Get-ChildItem "$sdkPkg\build\native" -ErrorAction SilentlyContinue | ForEach-Object { echo $_.Name }
           }
-          echo ""
-          echo "=== CppWinRT props ==="
-          $cppwinrt = "winui3\packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props"
-          if (Test-Path $cppwinrt) { echo "EXISTS" } else { echo "NOT FOUND" }
-          echo ""
-          echo "=== WindowsAppSDK props ==="
-          $wasdk = "winui3\packages\Microsoft.WindowsAppSDK.1.5.240428000\build\native\Microsoft.WindowsAppSDK.props"
-          if (Test-Path $wasdk) { echo "EXISTS" } else { echo "NOT FOUND - trying to find actual path:" }
-          Get-ChildItem "winui3\packages" -Directory -Filter "Microsoft.WindowsAppSDK*" -Recurse -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName }
-          echo ""
-          echo "=== Windows SDK WinMD ==="
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\References\10.0.22621.0" -Directory -Filter "Microsoft.UI.Xaml*" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }
 
       - name: Build solution (Release x64)
         run: msbuild winui3\ArtificialFlash.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackage=false
