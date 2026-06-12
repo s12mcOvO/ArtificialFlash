@@ -24,21 +24,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore NuGet packages
-        run: nuget restore winui3\ArtificialFlash.sln
-
-      - name: Find WinMD references
-        id: winmd
-        shell: pwsh
-        run: |
-          $refPkg = "winui3\packages\Microsoft.WindowsAppSDK.Ref.1.5.240627000"
-          $winmd = Get-ChildItem $refPkg -Recurse -Filter "Microsoft.UI.Xaml.winmd" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($winmd) {
-            echo "WINMD_PATH=$($winmd.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
-            echo "Found WinMD: $($winmd.FullName)"
-          } else {
-            echo "No WinMD found. Listing package contents:"
-            Get-ChildItem $refPkg -Recurse -Depth 3 | ForEach-Object { echo $_.FullName }
-          }
+        run: msbuild winui3\ArtificialFlash.sln -t:restore
 
       - name: Build solution (Release x64)
         run: msbuild winui3\ArtificialFlash.sln /p:Configuration=Release /p:Platform=x64 /p:AppxPackage=false
@@ -62,7 +48,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore NuGet packages
-        run: nuget restore winui3\ArtificialFlash.sln
+        run: msbuild winui3\ArtificialFlash.sln -t:restore
 
       - name: Create test certificate
         shell: pwsh
